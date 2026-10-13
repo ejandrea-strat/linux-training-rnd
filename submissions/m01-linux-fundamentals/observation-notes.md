@@ -49,3 +49,42 @@
 
 6. **Running processes:** you can list them with `ps aux`, which shows PIDs, commands, and CPU and memory use. The kernel creates, schedules, and tracks every process.
 
+## System Identity
+
+### Raw output: `uname -a`
+```text
+$ uname -a
+Linux CANATOY-1063 6.18.54.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026 x86_64 GNU/Linux
+```
+**Observation:** Shows information about the kernel I'm using. Since I'm running WSL2 on Windows, the kernel version is 6.18.54.1-microsoft-standard-WSL2. The "microsoft" in the name shows this kernel is built by Microsoft, not by Ubuntu.
+
+### Raw output: `cat /etc/os-release`
+```text
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 26.04.1 LTS"
+NAME="Ubuntu"
+VERSION_ID="26.04"
+VERSION="26.04.1 LTS (Resolute Raccoon)"
+VERSION_CODENAME=resolute
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=resolute
+LOGO=ubuntu-logo
+```
+**Observation:** Shows information about the distribution running on the kernel. In this case, I'm using Ubuntu 26.04.1 LTS. I expected /etc/os-release to show when the OS was released, but it actually shows the distro's name, version, and ID.
+
+### The four facts
+
+| Fact | My value | Source | Where in the output |
+| --- | --- | --- | --- |
+| Kernel version | 6.18.54.1-microsoft-standard-WSL2 | `uname -a` | 3rd field |
+| Kernel architecture | x86_64 | `uname -a` | field before `GNU/Linux` |
+| Distro name | Ubuntu | `/etc/os-release` | `NAME=` line |
+| Distro version | 26.04.1 LTS | `/etc/os-release` | `VERSION=` line |
+
+### WSL2 vs VM
+If I switched from WSL2 to a VM, the kernel version in `uname -a` would change, because a VM boots Ubuntu's own kernel instead of Microsoft's WSL2 kernel. The hostname would change too, but the architecture would likely stay x86_64 on the same CPU. If the same distro and version were installed, `/etc/os-release` would stay the same. This shows the kernel and the distro are independent facts.
