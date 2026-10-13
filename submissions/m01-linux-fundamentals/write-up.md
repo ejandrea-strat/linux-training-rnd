@@ -6,10 +6,11 @@ Observation notes that record which kernel and distribution my system is running
 
 ## Why it's built this way (key decisions)
 
+- I followed EPAV: Evaluate (OpenCode explained the brief's Research questions and quizzed me), Plan (I wrote my expectations and decided the order to check things), Apply (I ran every command myself, since the DoD needs output from my own terminal), and Validate (/validate passed all four DoD items)
 - I researched the brief's four "Research:" questions using OpenCode as a tutor, asking it to explain and quiz me instead of writing my notes.
 - I ran `uname -a` and `cat /etc/os-release` first, because kernel and distro are the first two facts to check when something behaves differently across machines.
 - What surprised me: I expected /etc/os-release to show when the OS was released, but it actually shows the distro's name, version, and ID. I also didn't expect the kernel name to include "microsoft". On WSL2 the kernel is built by Microsoft, while Ubuntu only provides the distro on top of it.
-- What surprised me about what was running: my shell's parent isn't the terminal app but a WSL `Relay` process, because the terminal window runs on Windows. WSL also runs its own processes, like `/init` and `plan9`, next to systemd
+- What surprised me about what was running: my shell's parent isn't the terminal app but a WSL `Relay` process, because the terminal window runs on Windows. WSL also runs its own processes, like `/init` and `plan9`, next to systemd.
 
 ## How to build it (teach it to the next trainee)
 
