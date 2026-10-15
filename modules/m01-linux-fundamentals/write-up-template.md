@@ -6,11 +6,27 @@ Observation notes that record which kernel and distribution my system is running
 
 ## Why it's built this way (key decisions)
 
-- I followed EPAV: Evaluate (OpenCode explained the brief's Research questions and quizzed me), Plan (I wrote my expectations and decided the order to check things), Apply (I ran every command myself, since the DoD needs output from my own terminal), and Validate (/validate passed all four DoD items)
-- I researched the brief's four "Research:" questions using OpenCode as a tutor, asking it to explain and quiz me instead of writing my notes.
-- I ran `uname -a` and `cat /etc/os-release` first, because kernel and distro are the first two facts to check when something behaves differently across machines.
-- What surprised me: I expected /etc/os-release to show when the OS was released, but it actually shows the distro's name, version, and ID. I also didn't expect the kernel name to include "microsoft". On WSL2 the kernel is built by Microsoft, while Ubuntu only provides the distro on top of it.
-- What surprised me about what was running: my shell's parent isn't the terminal app but a WSL `Relay` process, because the terminal window runs on Windows. WSL also runs its own processes, like `/init` and `plan9`, next to systemd.
+**Research questions answered:** all four from the brief, in the brief's order:
+1. What a system call is, and why the shell and the terminal emulator are different things
+2. What `uname -a` and `/etc/os-release` each report, and why they aren't the same fact
+3. What lives in `/dev` and `/proc`, and what "everything is a file" means in practice
+4. How to list running processes, and what the kernel has to do with them
+
+**Order of inspection:**
+1. Kernel and distro first (`uname -a`, `cat /etc/os-release`). Everything else runs on top of them, and they're the first two things to check when something works on one machine but not another.
+2. Then the shell: which shell is running, what started it, and where its input and output go (`ps -p $$`, `/proc/$$/fd`, `type`).
+3. Then `/dev` and `/proc`, to see how the kernel shows devices and its own information as files.
+4. Last, the running processes (`ps -ef`, `/proc/1/comm`), to see what the kernel is managing right now.
+
+This order was set before running anything, as the Plan step of EPAV.
+
+**What was running vs. what was expected:**
+- The expectation going in was that `ls` has a flag for listing processes. It doesn't. Processes are listed with `ps`, which reads what the kernel keeps in `/proc`.
+- The terminal app was expected to be the shell's parent. It's actually WSL's `Relay` process, because the terminal window runs on Windows.
+- WSL runs its own processes next to systemd: its own `/init` (PID 2) and `plan9`, which lets Windows reach the Linux files. Neither would be there on a normal Linux machine.
+- PID 1 is systemd, so this WSL2 setup runs like a normal Ubuntu system, which matches what the course assumes.
+
+Other surprises, outside the processes: `/etc/os-release` shows the distro's name, version and ID rather than a release date, and the kernel name includes "microsoft" because Microsoft builds the WSL2 kernel.
 
 ## How to build it (teach it to the next trainee)
 
