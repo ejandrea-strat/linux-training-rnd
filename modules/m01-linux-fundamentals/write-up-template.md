@@ -20,8 +20,6 @@ I also used EPAV to turn these notes into [`learning-materials.md`](./learning-m
 3. Then `/dev` and `/proc`, to see how the kernel shows devices and its own information as files.
 4. Last, the running processes (`ps -ef`, `/proc/1/comm`), to see what the kernel is managing right now.
 
-This order was set before running anything, as the Plan step of EPAV.
-
 **What was running vs. what was expected:**
 - The expectation going in was that `ls` has a flag for listing processes. It doesn't. Processes are listed with `ps`, which reads what the kernel keeps in `/proc`.
 - The terminal app was expected to be the shell's parent. It's actually WSL's `Relay` process, because the terminal window runs on Windows.
