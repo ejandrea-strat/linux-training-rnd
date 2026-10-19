@@ -4,6 +4,8 @@
 
 Observation notes that record which kernel and distribution my system is running. My setup is WSL2 on Windows, running Ubuntu 26.04.1 LTS on the kernel 6.18.54.1-microsoft-standard-WSL2. The notes cover my expectations before investigating, what I learned from research, the system identity lab (uname -a, /etc/os-release, the four identity facts, and WSL2 vs VM), shell vs terminal, /dev and /proc, the running processes, and how a command goes from keypress to output.
 
+I also used EPAV to turn these notes into [`learning-materials.md`](./learning-materials.md), a study guide that teaches M1 to the next trainee.
+
 ## Why it's built this way (key decisions)
 
 **Research questions answered:** all four from the brief, in the brief's order:
@@ -26,7 +28,7 @@ This order was set before running anything, as the Plan step of EPAV.
 - WSL runs its own processes next to systemd: its own `/init` (PID 2) and `plan9`, which lets Windows reach the Linux files. Neither would be there on a normal Linux machine.
 - PID 1 is systemd, so this WSL2 setup runs like a normal Ubuntu system, which matches what the course assumes.
 
-Other surprises, outside the processes: `/etc/os-release` shows the distro's name, version and ID rather than a release date, and the kernel name includes "microsoft" because Microsoft builds the WSL2 kernel.
+Other surprises, outside the processes: `/etc/os-release` shows the distro's name, version and ID rather than a release date, and the kernel version includes "microsoft" because Microsoft builds the WSL2 kernel.
 
 ## How to build it (teach it to the next trainee)
 
@@ -47,7 +49,7 @@ Other surprises, outside the processes: `/etc/os-release` shows the distro's nam
 
 ## What tripped me up
 
-- I thought the shell makes the system calls when I run a command. It actually only parses the command and launches the program. The program (like `ls`) is the one making the system calls.
+- I thought the shell makes all the system calls when I run a command. It only makes some, like asking the kernel to start the program. After that, the program (like `ls`) makes its own system calls to read the directory and print the output.
 - I typed `type l` instead of `type ls` and got an alias for `ls -CF`. `type -a ls` shows the full picture.
 
 ## Checkpoint evidence

@@ -33,13 +33,13 @@
 2. **Shell vs terminal emulator:**
    - **Shell** (like bash): a command interpreter that parses what you type and runs programs.
    - **Terminal emulator:** the window that displays text and sends your keystrokes to the shell.
-   - When you type a command, it goes from the terminal to the shell. The shell then invokes the program, and the program makes the system calls.
+   - When you type a command, it goes from the terminal to the shell. The shell then asks the kernel to start the program (a system call), and the program makes its own system calls.
 
 3. **`uname -a` vs `/etc/os-release`:**
    - **`uname -a`:** information about the running kernel (name, version,
      hostname, architecture, build info).
    - **`/etc/os-release`:** information from the distro's files (name, version, ID).
-   - They differ because one describes the kernel and the other describes the distribution. If we used a virtual machine instead of WSL2, `uname -a`would change. If we also used a different distribution in that VM, `/etc/os-release` would change too.
+   - They differ because one describes the kernel and the other describes the distribution. If we used a virtual machine instead of WSL2, `uname -a` would change. If we also used a different distribution in that VM, `/etc/os-release` would change too.
 
 4. **`/dev` and `/proc`:**
    - **`/dev`:** device files that represent hardware, like disks, terminals, and `/dev/null`.
@@ -56,7 +56,7 @@
 $ uname -a
 Linux CANATOY-1063 6.18.54.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Tue Oct  6 19:13:07 UTC 2026 x86_64 GNU/Linux
 ```
-**Observation:** Shows information about the kernel I'm using. Since I'm running WSL2 on Windows, the kernel version is 6.18.54.1-microsoft-standard-WSL2. The "microsoft" in the name shows this kernel is built by Microsoft, not by Ubuntu.
+**Observation:** Shows information about the kernel I'm using. Since I'm running WSL2 on Windows, the kernel version is 6.18.54.1-microsoft-standard-WSL2. The "microsoft" in the version shows this kernel is built by Microsoft, not by Ubuntu.
 
 ### Raw output: `cat /etc/os-release`
 ```text
@@ -133,7 +133,7 @@ $ ps -p 12781 -o pid,ppid,comm,args
 
 **Observation:** Shows what started my shell. It's not the terminal app but Relay(12782), a WSL helper that passes input and output between my shell and the terminal window on Windows.
 
-**Expected vs actual:** I expected the shell and the terminal emulator to use different kernels (expectation #2), but they're actually two separate programs connected through /dev/pts/3.
+**Expected vs actual:** I expected the terminal emulator to have its own kernel (expectation #2), but it doesn't. The terminal and the shell are two separate programs connected through /dev/pts/3. On WSL2 the terminal runs on Windows, and bash runs on the Linux kernel.
 
 ## 5. The filesystem as an abstraction
 
