@@ -143,7 +143,7 @@ lrwxrwxrwx 1 root root         16 Aug 27 22:11 vconsole.conf -> default/keyboard
 **Observation:** Shows the same list, but this time it went into conf-list.txt instead of the screen. This is the redirected file listing the brief asks for: a pipe and a redirect in one command.
 
 ```text
-ls -l /etc | grep -F ".conf"
+$ ls -l /etc | grep -F ".conf"
 -rw-r--r-- 1 root root       4027 Nov  4  2025 adduser.conf
 -rw-r--r-- 1 root root       6274 Aug 27 22:12 ca-certificates.conf
 -rw-r--r-- 1 root root       6174 Aug 27 22:11 ca-certificates.conf.dpkg-old
