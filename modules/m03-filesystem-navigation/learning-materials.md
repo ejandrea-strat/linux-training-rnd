@@ -606,11 +606,21 @@ reference:
 - `man hier` — the Filesystem Hierarchy Standard as your distro implements it; what each
   top-level directory is for.
 - `man mkdir` — creating directories, including `-p` / `--parents`.
+- `man ls` — the listing flags used in this module: `-a`, `-l`, and `-R` for a recursive listing.
 - `man find` — tests such as `-name` and `-iname`, and the shell-style pattern syntax.
 - `man locate` — the file-name database search. Note: `locate` **may not be installed** on your
   system (the lab uses `find`, which needs no database).
 - `man bash` — the `cd` builtin, and "Tilde Expansion" for how `~` is substituted before a
   command runs.
+
+Online copies of the same pages:
+
+- [`hier(7)`](https://man7.org/linux/man-pages/man7/hier.7.html)
+- [`mkdir(1)`](https://man7.org/linux/man-pages/man1/mkdir.1.html)
+- [`ls(1)`](https://man7.org/linux/man-pages/man1/ls.1.html)
+- [`find(1)`](https://man7.org/linux/man-pages/man1/find.1.html)
+- [`locate(1)`](https://man7.org/linux/man-pages/man1/locate.1.html)
+- [`bash(1)`](https://man7.org/linux/man-pages/man1/bash.1.html#EXPANSION), opened at the EXPANSION section, where Tilde Expansion is
 
 Module artifacts:
 
