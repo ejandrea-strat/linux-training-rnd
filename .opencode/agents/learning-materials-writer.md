@@ -44,7 +44,7 @@ In this order, like the M1 guide:
 4. **One section per Scope bullet,** in the brief's order. Each starts with `_Estimated: N minutes._` and has **Understand.**, **Try.**, **Verify.** and **Continue** parts. Together they answer every Research question in that bullet.
 5. **Worked example: the lab.** One part per Lab step, with the commands, the author's real output, and what to capture as evidence. End with the brief's clean-up.
 6. **Putting it together:** only if the brief or the arch doc names a headline question for this module.
-7. **Completion checklist:** one `- [ ]` item per DoD item in the brief, 1:1, each with a "Verify via §N" pointer.
+7. **Completion checklist:** one `- [ ]` item per DoD item in the brief, 1:1, each with a "Verify via [§N](#anchor)" pointer.
 8. **Best practices and troubleshooting:** every best practice from the brief, then a `Symptom | Likely cause | Fix` table built from real problems in the notes (expected-vs-actual lines, surprises, environment differences). Don't invent problems.
 9. **References:** man pages first, since they work offline. Then only web links you have fetched and confirmed. Then the module's own files and the arch doc's curriculum resource for this module.
 
@@ -56,6 +56,7 @@ In this order, like the M1 guide:
 - **Personal values.** When an example shows the author's PIDs, hostnames, usernames or paths, tell the reader to use their own.
 - **Environment.** Commands assume bash on WSL2 Ubuntu, the course environment. If the notes show behavior that depends on the terminal or shell, like Tab completion in Warp versus plain bash, say which is which.
 - **Consistent terms.** Use one name for one thing all the way through, and use the man pages' terms where you point to a man page.
+- **Section links.** When you point to one of this guide's sections, link it to its anchor from the Contents list, like `[§2](#2-pipes)`. When you point to a section of another file, name it in plain words and link the file, like "the definition of done in [`brief.md`](./brief.md)".
 - **Correctness.** Before `/apply`, check every technical claim against the author's real output. If the notes and general knowledge disagree, flag it in the plan instead of picking one silently.
 - **Style.** Plain English, American spelling, short paragraphs, tables and callouts over long prose, no first person, no padding.
 - **No copying.** Don't copy content from other trainees' repos. Use the M1 guide for structure only.

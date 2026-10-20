@@ -127,7 +127,7 @@ $ ps -p 12781 -o pid,ppid,comm,args
 **Verify.** `ps -p $$` shows a shell process; `ls -l /proc/$$/fd` shows fds 0, 1, 2 pointing at a
 `/dev/pts/N` device; `type cd` says *builtin*; `type -a ls` shows a path.
 
-**Continue** to §2 to learn where the kernel and distro announce their identities.
+**Continue** to [§2](#2-system-identity) to learn where the kernel and distro announce their identities.
 
 ---
 
@@ -203,9 +203,9 @@ Reading the fields:
 
 **Verify.** Both commands print output on your machine. In the author's WSL2 output, `uname -a` says
 nothing about Ubuntu, and `/etc/os-release` says nothing about the kernel. Extracting the four headline facts and
-comparing WSL2 with a VM happens in **§5**.
+comparing WSL2 with a VM happens in **[§5](#5-worked-example-the-m1-lab)**.
 
-**Continue** to §3 to see what else the kernel exposes — as files.
+**Continue** to [§3](#3-the-filesystem-as-an-abstraction) to see what else the kernel exposes — as files.
 
 ---
 
@@ -280,7 +280,7 @@ it returns real CPU details. Nothing is stored on disk — the kernel produces t
 **Verify.** Your `/dev` listing contains entries whose mode starts with `c` or `b`, and
 `/proc/cpuinfo` reports a 0-byte size while still printing CPU lines.
 
-**Continue** to §4 to use `/proc` to see what is running right now.
+**Continue** to [§4](#4-a-live-system) to use `/proc` to see what is running right now.
 
 ---
 
@@ -347,7 +347,7 @@ system. PID 1 appears as `/sbin/init`, which *is* systemd — hence `cat /proc/1
 **Verify.** `ps -ef` shows a PID/PPID tree headed by PID 1; your process count prints a number;
 `cat /proc/1/comm` names your init system.
 
-**Continue** to §5, where you produce the lab evidence.
+**Continue** to [§5](#5-worked-example-the-m1-lab), where you produce the lab evidence.
 
 ---
 
@@ -451,7 +451,7 @@ two-sentence WSL2-versus-VM explanation.
 
 **Clean-up.** None — this lab only reads system information.
 
-**Continue** to §6 to tie the lab together into the course's headline question.
+**Continue** to [§6](#6-putting-it-together-from-keypress-to-output) to tie the lab together into the course's headline question.
 
 ---
 
@@ -471,7 +471,7 @@ typing `ls` and pressing Enter:
    terminal window.
 5. Bash prints the prompt again.
 
-Every layer from §1–§4 appears here: the **terminal emulator** collects input; the **shell**
+Every layer from [§1](#1-kernel-shell-and-distro)–[§4](#4-a-live-system) appears here: the **terminal emulator** collects input; the **shell**
 interprets it; the **kernel** starts the process and performs the directory read; the **filesystem
 as an abstraction** supplies `/dev/pts/3` and `/usr/bin/ls`; and the **running processes** are the
 shell and `ls` themselves. All of it runs on the kernel reported by `uname -a`
@@ -484,7 +484,7 @@ distribution from `/etc/os-release` as the two layers involved.
 **Verify.** You can answer, unprompted: *"What happens between typing a command and seeing
 output?"* This is the course's self-check at the M1–M2 boundary.
 
-**Continue** to §7 to confirm the deliverable is complete.
+**Continue** to [§7](#7-completion-checklist) to confirm the deliverable is complete.
 
 ---
 
@@ -492,20 +492,19 @@ output?"* This is the course's self-check at the M1–M2 boundary.
 
 _Estimated: 5 minutes._
 
-Map your observation notes to the brief's definition of done
-([`brief.md`](./brief.md) §Definition of done):
+Map your observation notes to the definition of done in [`brief.md`](./brief.md):
 
 - [ ] **DoD-01 — Real output, not paraphrase.** The notes show the raw, pasted output of `uname -a`
       and `cat /etc/os-release` from your own terminal (Lab step 1), not facts copied from
-      documentation or written from memory. *Verify via §5, Step 1.*
+      documentation or written from memory. *Verify via [§5](#5-worked-example-the-m1-lab), Step 1.*
 - [ ] **DoD-02 — The four facts, located.** The notes name the kernel version, kernel architecture,
       distribution name, and distribution version, and show where in the output each one appears.
-      *Verify via §5, Step 2.*
+      *Verify via [§5](#5-worked-example-the-m1-lab), Step 2.*
 - [ ] **DoD-03 — Kernel and distro are independent.** The notes explain in one or two sentences what
       would change in step 1's output when switching between the WSL2 and Virtual Machine paths.
-      *Verify via §5, Step 3.*
+      *Verify via [§5](#5-worked-example-the-m1-lab), Step 3.*
 - [ ] **DoD-04 — The headline question.** Using your own output as evidence, you can answer
-      unprompted: *"What happens between typing a command and seeing output?"* *Verify via §6.*
+      unprompted: *"What happens between typing a command and seeing output?"* *Verify via [§6](#6-putting-it-together-from-keypress-to-output).*
 
 When all four are ticked, transfer the evidence into your write-up
 ([`write-up-template.md`](./write-up-template.md)) and continue to M2.
@@ -519,17 +518,17 @@ _Estimated: 5 minutes._
 ### Best practices
 
 - **Treat kernel and distro version as the first two facts to check** when something behaves
-  differently across machines. Most "works on my machine" surprises start there (§2).
+  differently across machines. Most "works on my machine" surprises start there ([§2](#2-system-identity)).
 - **Do not assume distro-specific defaults transfer.** Package manager, default shell, and service
-  manager differ between distros, and none of them is safe to guess (§1).
+  manager differ between distros, and none of them is safe to guess ([§1](#1-kernel-shell-and-distro)).
 - **Keep "the shell" and "the terminal emulator" distinct.** Confusing the window with the command
-  interpreter leads to wrong conclusions about where problems live (§1).
+  interpreter leads to wrong conclusions about where problems live ([§1](#1-kernel-shell-and-distro)).
 
 ### Troubleshooting
 
 | Symptom | Likely cause | Recommended fix |
 | --- | --- | --- |
-| `uname -a` shows `microsoft-standard-WSL2` in the kernel release | This is expected under WSL2: Microsoft builds the kernel, while the distribution files come from Ubuntu. It is not a mis-installed distro, and the two layers are independent (§2). | Nothing to fix. If you need Ubuntu's own kernel, use the Virtual Machine path instead — `uname -a` changes, `/etc/os-release` need not. |
+| `uname -a` shows `microsoft-standard-WSL2` in the kernel release | This is expected under WSL2: Microsoft builds the kernel, while the distribution files come from Ubuntu. It is not a mis-installed distro, and the two layers are independent ([§2](#2-system-identity)). | Nothing to fix. If you need Ubuntu's own kernel, use the Virtual Machine path instead — `uname -a` changes, `/etc/os-release` need not. |
 | The terminal application never appears in `ps` output | The terminal itself runs on Windows. Only its WSL-side relay appears inside the Linux session (e.g. `Relay(...)` or `/init`, as in the author's notes). | Expect only the relay process. Use `ps -ef` and look for `/init` or `Relay`; check the shell's PPID with `ps -p $$ -o ppid=`. |
 | `type l` reports an alias instead of a path | `l` is a shortcut alias for `ls -CF`, not a separate program. | Check the command you actually meant: `type -a ls` shows the alias and the real program path (`/usr/bin/ls`). |
 | PID 1 is not `systemd` | systemd is not enabled for this WSL2 instance, so another init runs as PID 1. | Check the setting and enable it explicitly in `/etc/wsl.conf` under `[boot]` (`systemd=true`), then restart the WSL2 instance (`wsl --shutdown` from Windows) and re-run `cat /proc/1/comm`. |

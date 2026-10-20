@@ -96,7 +96,7 @@ flag `-l`, argument `/etc`.
 **Verify.** Your two commands print the same list, including `.` and `..`. You can point at the
 name, the flag, and the argument in a command you ran today, and explain what each changed.
 
-**Continue** to §2 to feed one command's output straight into another.
+**Continue** to [§2](#2-pipes) to feed one command's output straight into another.
 
 ---
 
@@ -215,7 +215,7 @@ With `-F`, `dconf` and `netconfig` are gone; `manpath.config` stays because it r
 to right as two steps — what `ls -l` produces, what `grep` keeps — and you can explain why the
 plain run matched two extra entries.
 
-**Continue** to §3 to decide where command output ends up: screen or file.
+**Continue** to [§3](#3-redirection) to decide where command output ends up: screen or file.
 
 ---
 
@@ -273,7 +273,7 @@ line one, and the file would have contained only `line two`.
 **Verify.** Your `cat` prints both lines. In your notes, state which line was written with `>` and
 which with `>>`, and what would have been lost if `>` had been used for both.
 
-**Continue** to §4 to learn how to check a command's behavior before running it.
+**Continue** to [§4](#4-built-in-help) to learn how to check a command's behavior before running it.
 
 ---
 
@@ -355,7 +355,7 @@ Both explain grep's options: `man grep` is a full manual you can scroll and sear
 
 Something the author did not already know, visible in that `--help` output: **grep treats the
 pattern as a regular expression by default, and `-F` (`--fixed-strings`) makes it match plain
-text** — which is exactly the `-F` run shown in §2.
+text** — which is exactly the `-F` run shown in [§2](#2-pipes).
 
 Now tab completion. Typing `cd ~/linux-cou` and pressing Tab turned it into
 `cd ~/linux-course/` — the shell finished the path, because only one folder starts with `linux-cou`.
@@ -391,7 +391,7 @@ Neither terminal picks a match for you.
 `grep --help`, plus one thing either revealed that you did not already know. You have seen what Tab
 does with one match (it completes) and with several (it lists, on the second press in plain bash).
 
-**Continue** to §5 to produce the lab evidence.
+**Continue** to [§5](#5-worked-example-the-m2-lab) to produce the lab evidence.
 
 ---
 
@@ -416,10 +416,10 @@ echo "line one" > practice.txt
 echo "line two" >> practice.txt
 ```
 
-The author's exact command block is shown in §3; there is no output until step 2 reads the file.
+The author's exact command block is shown in [§3](#3-redirection); there is no output until step 2 reads the file.
 
 **Capture.** Record the commands and, in your own notes, which line was written with `>` and which
-with `>>`, plus what would have been lost if `>` had been used for both (§3's misconception box is
+with `>>`, plus what would have been lost if `>` had been used for both ([§3](#3-redirection)'s misconception box is
 the reasoning, not the answer to copy — write it in your own words).
 
 ### Step 2 — Confirm both lines are present
@@ -456,11 +456,11 @@ ls -l /etc | grep ".conf"
 ```
 
 Output from the author's observation notes — the full capture for this step is the listing shown
-in §2 (same command, same output; it is this step's evidence).
+in [§2](#2-pipes) (same command, same output; it is this step's evidence).
 
 **Capture.** Paste the full output, prompt line included, and write the left-to-right reading in
 your own words: what `ls -l /etc` produced, what `grep ".conf"` kept. If your output has entries
-the literal string `.conf` does not appear in, explain why (§2) rather than deleting them.
+the literal string `.conf` does not appear in, explain why ([§2](#2-pipes)) rather than deleting them.
 
 ### Step 4 — Read both forms of help
 
@@ -474,7 +474,7 @@ man grep        # then q to quit
 grep --help
 ```
 
-Output from the author's observation notes — both captures are shown in §4
+Output from the author's observation notes — both captures are shown in [§4](#4-built-in-help)
 (`man grep | head -15` and `grep --help | head -10`).
 
 **Capture.** Show that you opened both `man grep` and `grep --help`, and state something one of
@@ -505,7 +505,7 @@ sysctl.d/ systemd/
 
 **Capture.** Record the path Tab completed and what happened on an ambiguous prefix — and say
 which terminal you used (plain Ubuntu terminal or Warp), since the first press behaves differently
-in each (§4).
+in each ([§4](#4-built-in-help)).
 
 ### You build and capture — the deliverable
 
@@ -561,7 +561,7 @@ command that creates the file — re-running it must reproduce the file's conten
 
 **Clean-up.** Nothing to clean up. The practice files stay under `~/linux-course/`.
 
-**Continue** to §6 to tie the pipeline back to the course's self-check question.
+**Continue** to [§6](#6-putting-it-together-from-keypress-to-pipeline-output) to tie the pipeline back to the course's self-check question.
 
 ---
 
@@ -593,7 +593,7 @@ and say which program's fd 1 is the file.
 **Verify.** You can answer, unprompted: *"What happens between typing a command and seeing
 output?"* — including what changes when the line contains a pipe or a redirect.
 
-**Continue** to §7 to confirm the deliverable is complete.
+**Continue** to [§7](#7-completion-checklist) to confirm the deliverable is complete.
 
 ---
 
@@ -601,24 +601,23 @@ output?"* — including what changes when the line contains a pipe or a redirect
 
 _Estimated: 5 minutes._
 
-Map your observation notes to the brief's definition of done
-([`brief.md`](./brief.md) §Definition of done):
+Map your observation notes to the definition of done in [`brief.md`](./brief.md):
 
 - [ ] **DoD-01 — The file exists and reproduces.** `practice.txt` exists on disk and your pasted
       `cat` output shows both lines, and re-running the documented commands reproduces the file
-      (Lab steps 1–2). *Verify via §5, Steps 1–2.*
+      (Lab steps 1–2). *Verify via [§5](#5-worked-example-the-m2-lab), Steps 1–2.*
 - [ ] **DoD-02 — Overwrite vs append, stated.** Your notes state which line was written with `>`
       and which with `>>`, and what would have been lost if `>` had been used for both (Lab
-      step 1). *Verify via §3 and §5, Step 1.*
+      step 1). *Verify via [§3](#3-redirection) and [§5](#5-worked-example-the-m2-lab), Step 1.*
 - [ ] **DoD-03 — The pipeline, read left to right.** Your pasted output of
       `ls -l /etc | grep ".conf"` shows only matching entries, and you can read the pipeline as two
-      steps: what `ls -l` produces and what `grep` keeps (Lab step 3). *Verify via §2 and §5,
+      steps: what `ls -l` produces and what `grep` keeps (Lab step 3). *Verify via [§2](#2-pipes) and [§5](#5-worked-example-the-m2-lab),
       Step 3.*
 - [ ] **DoD-04 — Both forms of help, one new fact.** Your notes show that you opened both
       `man grep` and `grep --help`, and state something one of them revealed which you did not
-      already know (Lab step 4). *Verify via §4 and §5, Step 4.*
+      already know (Lab step 4). *Verify via [§4](#4-built-in-help) and [§5](#5-worked-example-the-m2-lab), Step 4.*
 - [ ] **DoD-05 — Tab completion recorded.** Your notes show what Tab-completion did with the
-      partial path `~/linux-cou` (Lab step 5). *Verify via §4 and §5, Step 5.*
+      partial path `~/linux-cou` (Lab step 5). *Verify via [§4](#4-built-in-help) and [§5](#5-worked-example-the-m2-lab), Step 5.*
 
 When all five are ticked, transfer the evidence into your write-up
 ([`write-up-template.md`](./write-up-template.md)) and continue to M3.
@@ -632,12 +631,12 @@ _Estimated: 5 minutes._
 ### Best practices
 
 - **Prefer `>>` over `>` when appending to a log or an existing file.** `>` truncates before it
-  writes; the old content is gone the moment the command runs (§3).
+  writes; the old content is gone the moment the command runs ([§3](#3-redirection)).
 - **Read a pipeline left to right as a sequence of transformations.** Each command is one step that
   changes or filters what came before it — that habit scales to pipelines much longer than two
-  commands (§2).
+  commands ([§2](#2-pipes)).
 - **Check `man` or `--help` before guessing a flag's behavior.** Both work offline, and guessing is
-  how patterns silently match more than you meant (§4).
+  how patterns silently match more than you meant ([§4](#4-built-in-help)).
 
 ### Troubleshooting
 
@@ -645,9 +644,9 @@ _Estimated: 5 minutes._
 | --- | --- | --- |
 | First Tab on an ambiguous prefix rings the bell and prints nothing (plain Ubuntu terminal) | bash's default completion: there is nothing it can add beyond what you typed | Press Tab a second time to list the matches (author's notes) |
 | Tab shows a list on the first press | The terminal's own completion menu (Warp) handles Tab, not bash — expected behavior, not a broken shell | Expected; use the plain Ubuntu terminal to see bash's default (bell, then the list on the second Tab) (author's notes) |
-| `grep ".conf"` also matched `dconf` and `netconfig` | In a grep pattern, `.` means *any character*, not a literal dot — `.conf` also matches `xconf` | Use `grep -F ".conf"` (`--fixed-strings`) to match plain text; the author's `-F` run drops those lines (§2) |
-| Earlier file contents vanished after a redirect | `>` truncates the file before writing | Use `>>` to append; check with `cat` first — once `>` has run, the old content is gone (§3) |
-| Man page keys behave like `nano` — or don't respond as expected | `man` opens a pager (a viewer), not an editor | `Space` next page, `b` back a page, `/` search, `n` next match, `q` quit (§4) |
+| `grep ".conf"` also matched `dconf` and `netconfig` | In a grep pattern, `.` means *any character*, not a literal dot — `.conf` also matches `xconf` | Use `grep -F ".conf"` (`--fixed-strings`) to match plain text; the author's `-F` run drops those lines ([§2](#2-pipes)) |
+| Earlier file contents vanished after a redirect | `>` truncates the file before writing | Use `>>` to append; check with `cat` first — once `>` has run, the old content is gone ([§3](#3-redirection)) |
+| Man page keys behave like `nano` — or don't respond as expected | `man` opens a pager (a viewer), not an editor | `Space` next page, `b` back a page, `/` search, `n` next match, `q` quit ([§4](#4-built-in-help)) |
 
 ---
 
