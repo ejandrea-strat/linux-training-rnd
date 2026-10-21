@@ -40,3 +40,42 @@ the documentation on its own merits without being misled about lab completion.
 
 Any stage where a Nexus EPAV run produces docs rather than a running system (M01, and write-up-only
 tasks generally). Complements the "preserve originals, add separate files" convention.
+
+---
+
+# Pattern — Citing man pages in a course learning guide
+
+**Discovered in:** M5 (Users, Permissions, Ownership)
+**Context:** A learning guide that points the reader at manual pages for offline reference.
+
+## Problem
+
+On the course environment (WSL2 Ubuntu 26.04) `sudo` is **sudo-rs**, a Rust rewrite. `man sudo`
+opens the sudo-rs page, and that page has no SECURITY NOTES section. A guide that says "see
+`man sudo` for why `sudo su` is different" sends the reader to a page that does not carry the
+fact, while the upstream `sudo(8)` page does.
+
+## Pattern
+
+1. **Run `man <cmd>` on the course image before claiming a page contains a section.** Do not
+   assume the local manual matches the upstream one.
+2. **Cite the page that carries the fact.** The "a `sudo su` shell sits outside the sudoers
+   policy" point lives in the upstream `sudo(8)` page, not in the sudo-rs page.
+3. **Name both pages when they differ,** and say why (the tool was rewritten; it still reads the
+   same `/etc/sudoers`), so the reader is not confused by what their terminal opens.
+4. **Link only pages that were opened and confirmed.** Offline man pages first; online copies
+   second, and only ones actually fetched.
+5. **Keep the general rule separate from the machine-specific fact.** "Root is not limited by read
+   and write bits" is general; "`[sudo: authenticate] Password:` is what this build prints" is
+   not. Label the second kind.
+
+## Why it works
+
+The reader either has no internet or types `man sudo` and lands somewhere else. Naming both pages
+keeps the guide honest about what is on their machine and still gives them the source of the
+fact they need.
+
+## Applies to
+
+Any guide that cites a manual page. M5 hit the sudo-rs split; M4 already shows the sudo-rs
+prompt text; M6 and M13 will cite `sudo`, `useradd`, and `groupadd` the same way.
