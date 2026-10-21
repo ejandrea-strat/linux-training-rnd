@@ -1,6 +1,29 @@
 # M1 Lab — Linux Fundamentals
 
-The M1 lab as I ran it on WSL2 with Ubuntu and bash: each command, its real output copied exactly, and what it shows.
+What I learned from researching M1, then the lab as I ran it on WSL2 with Ubuntu and bash: each command, its real output copied exactly, and what it shows.
+
+## What I learned from research
+
+1. **System call:** how a program asks the kernel to do something it can't do on its own, like reading a file.
+
+2. **Shell vs terminal emulator:**
+   - **Shell** (like bash): a command interpreter that parses what you type and runs programs.
+   - **Terminal emulator:** the window that displays text and sends your keystrokes to the shell.
+   - When you type a command, it goes from the terminal to the shell. The shell then asks the kernel to start the program (a system call), and the program makes its own system calls.
+
+3. **`uname -a` vs `/etc/os-release`:**
+   - **`uname -a`:** information about the running kernel (name, version,
+     hostname, architecture, build info).
+   - **`/etc/os-release`:** information from the distro's files (name, version, ID).
+   - They differ because one describes the kernel and the other describes the distribution. If we used a virtual machine instead of WSL2, `uname -a` would change. If we also used a different distribution in that VM, `/etc/os-release` would change too.
+
+4. **`/dev` and `/proc`:**
+   - **`/dev`:** device files that represent hardware, like disks, terminals, and `/dev/null`.
+   - **`/proc`:** a special directory where the kernel exposes information as files, like CPU details, memory usage, and per-process info.
+
+5. **"Everything is a file":** many system resources (devices, processes, kernel data) can be read and written with the same file operations, even though they aren't real files on disk.
+
+6. **Running processes:** you can list them with `ps aux`, which shows PIDs, commands, and CPU and memory use. The kernel creates, schedules, and tracks every process.
 
 ## System Identity
 

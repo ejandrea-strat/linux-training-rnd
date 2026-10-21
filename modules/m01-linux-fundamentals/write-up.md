@@ -2,7 +2,7 @@
 
 ## What I built
 
-Lab notes that record which kernel and distribution my system is running, in [`m01-linux-fundamentals-lab.md`](../../knowledge/resources/m01-linux-fundamentals-lab.md). My setup is WSL2 on Windows, running Ubuntu 26.04.1 LTS on the kernel 6.18.54.1-microsoft-standard-WSL2. The notes cover the system identity lab (uname -a, /etc/os-release, the four identity facts, and WSL2 vs VM), shell vs terminal, /dev and /proc, the running processes, and how a command goes from keypress to output.
+Lab notes that record which kernel and distribution my system is running, in [`m01-linux-fundamentals-lab.md`](../../knowledge/resources/m01-linux-fundamentals-lab.md). My setup is WSL2 on Windows, running Ubuntu 26.04.1 LTS on the kernel 6.18.54.1-microsoft-standard-WSL2. The notes cover what I learned from research, the system identity lab (uname -a, /etc/os-release, the four identity facts, and WSL2 vs VM), shell vs terminal, /dev and /proc, the running processes, and how a command goes from keypress to output.
 
 I also used EPAV to write [`learning-materials.md`](./learning-materials.md), a study guide that teaches M1 to the next trainee.
 

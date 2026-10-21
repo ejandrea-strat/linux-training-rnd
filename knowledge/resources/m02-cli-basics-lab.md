@@ -1,6 +1,32 @@
 # M2 Lab — CLI Basics
 
-The M2 lab as I ran it on WSL2 with Ubuntu and bash: each command, its real output copied exactly, and what it shows.
+What I learned from researching M2, then the lab as I ran it on WSL2 with Ubuntu and bash: each command, its real output copied exactly, and what it shows.
+
+## What I learned from research
+
+1. **Command anatomy: Short flag vs long flag vs argument**
+   - **Short flag:** a flag that uses a single dash and a letter (e.g. `ls -l`). This type of flag can be combined (e.g. `ls -la` = `-l` and `-a`) and is faster to type in but is not easy to read.
+   - **Long flag:** a flag that uses double dashes and a word (e.g. `ls --color`). This type of flag is easier to read and remember but is not combinable like short flags. Some long flags take a value (`--color=auto`).
+   - **Argument:** it is the thing that the command acts on. It can be a file, directory, or a pattern. In `ls -l /etc`, `ls` is the name, `-l` is a flag, and `/etc` is the argument.
+   - A flag changes how the command behaves, while an argument says what it acts on.
+
+2. **Pipes:**
+   - **What it does:** it takes the *standard output* (what would hit the screen) of the command on its left and feeds it in as *standard input* to the command on its right, without a file in between.
+   - **Reading left to right:** each command is one transformation step and is read like a sentence. For example, in `ls -l /etc | grep ".conf"`, `ls -l /etc` produces the listing, then `grep ".conf"` keeps only the lines with `.conf`. The output gets filtered or changed at every step.
+   - Only standard output (fd 1) goes through the pipe. Errors (fd 2) still show on the screen.
+
+3. **Redirection:**
+   - `>` truncates (empties) the file, then writes. It creates a new file if it doesn't exist, but overwrites the contents if it does.
+   - `>>` also creates a new file if it's missing, but appends the new output at the end of the file if it exists.
+   - If `>` is used by mistake instead of `>>`, the file's previous content is destroyed instantly and all history in that file is gone. If `>>` is used by mistake instead of `>`, nothing is lost, but the old lines are still there, mixed with the new output, since it only appends at the end.
+
+4. **Built-in help:**
+   - Man pages are built-in manuals. When you open one (`man grep`), you're in a viewer with simple keys:
+      - `Space` = next page, `b` = back a page
+      - `/word` = search, `n` = next match
+      - `q` = quit
+   - `--help` prints a short summary of a command's options straight to the screen, without opening the viewer (e.g. `grep --help`).
+   - Tab finishes what you're typing for you — if there's more than one possible match, the first Tab fills in what they all share, and pressing Tab twice shows you the list.
 
 ## Redirection: > and >>
 

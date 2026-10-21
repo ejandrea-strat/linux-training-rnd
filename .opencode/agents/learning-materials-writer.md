@@ -55,7 +55,7 @@ In this order:
 - **No lab record.** Never present an example as the author's result or as evidence, and never write "the author's output" or "from the notes".
 - **Where the brief and the environment differ.** If the lab file shows one of the brief's commands failing or behaving differently on the course environment, show what the brief's command does, then teach the way that works.
 - **Troubleshooting.** Each row's symptom must be a message or behavior the command really produces, taken from the lab file or the command's documentation. Don't invent problems.
-- **Misconceptions.** Only add a `> **Common misconception:**` callout when the brief or `tasks.md` names the misconception, or the lab file shows it in an "Expected vs actual" line.
+- **No misconception callouts.** Never add `> **Common misconception:**` callouts. Teach the correct idea in the section's own text.
 - **Order.** A Try block only uses files, users and packages the reader has already created at that point in the guide. Show anything made later as a preview, with a link to the step that makes it.
 - **Environment.** Commands assume bash on WSL2 Ubuntu 26.04, the course environment. Where the terminal or the shell changes the behavior, like Tab completion in Warp versus plain bash, say which is which.
 - **Consistent terms.** Use one name for one thing all the way through, and use the man pages' terms where you point to a man page.
