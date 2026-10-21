@@ -2,27 +2,31 @@
 
 > **Purpose.** A self-contained study guide for every concept, command, and question named in
 > [`brief.md`](./brief.md). It teaches the material; it does **not** replace the lab. Work the lab
-> on your own machine and record what really happened in your own
+> on your own machine and record what really happened in your own `write-up.md`, made from
 > [`write-up-template.md`](./write-up-template.md).
 >
-> **Audience.** Data engineers who are new to Linux internals, comfortable with the M1–M3
-> material (shell, pipes, redirection, `man`, the `~/linux-course` directory layout). You need
-> the Linux environment from M0 (WSL2, a VM, or Linux-in-a-container), a terminal, and — for
-> part of the lab — a second terminal tab or window.
+> **Audience.** Data engineers who are new to Linux internals, working in the course's Linux
+> environment (WSL2, a VM, or Linux in a container). You need a terminal, and — for one lab step —
+> a second terminal tab or window.
 >
-> **Scope note.** Every example output below is **illustrative** unless it is explicitly labeled
-> as coming from the author's observation notes
-> ([`knowledge/observations/m04-viewing-editing-files.md`](../../knowledge/observations/m04-viewing-editing-files.md)).
-> The labeled outputs were captured on WSL2 on a specific machine; values such as hostname
-> (`CANATOY-1063`), username (`ejandrea`), timestamps, PIDs, log line counts, and file paths will
-> differ on yours. Never copy an example as evidence — run the command and paste your own output.
-> Tools with no captured output in the notes (`less`, `nano`) are described in words only.
+> **Scope note.** Every command output in this guide is **illustrative** — it shows the shape of
+> what a command prints, not a record of a completed lab. Values such as your username, home path,
+> hostname, timestamps, PIDs, addresses, and line counts differ on your machine. Run each command
+> and paste your own output before you use any example as evidence.
 >
 > **How to use this guide.** Each section follows **Understand → Try → Verify → Continue**:
 > read the explanation, run the commands on your own system, confirm your output matches the
-> *shape* of the examples, then move on. The guided path takes roughly **95–100 minutes**. M4
-> shares Week 2 of the course with M3 (5–6 estimated hours in total for the filesystem/data
-> layer).
+> *shape* of the examples, then move on. The guided path takes **91 minutes** — 13 + 13 + 12 + 13
+> for the four concept sections, 25 for the worked example, and 5 each for the checklist, the best
+> practices, and the references. M4 shares **Week 2** of the course with M3, in **Layer 2
+> (Filesystem & Data Handling)**. Commands assume **bash** on **WSL2 Ubuntu 26.04**, the course
+> environment; on a Virtual Machine or in a container the same commands report your own
+> environment's values.
+>
+> **Prerequisites.** M2's pipes and `>` redirection, for saving a filtered excerpt to a file. M3's
+> project tree `~/linux-course/m3`, with its `data/raw`, `data/processed`, and `docs` folders — the
+> lab writes into that tree, and a folder that is missing will stop the lab. The shell, the
+> terminal, and `man` from M1 and M2 are assumed throughout.
 
 ## Contents
 
@@ -39,300 +43,45 @@
 
 ## 1. Viewing a file
 
-_Estimated: 15 minutes._
+_Estimated: 13 minutes._
 
 **Understand.** A small set of tools covers nearly every day-to-day viewing case, and which one
 fits depends on whether the file is short, long, or still growing:
 
 | Tool | What it does | Choose it when |
 | --- | --- | --- |
-| `cat` | Prints the whole file to the screen in one go | The file is a screenful or less, and you want the text to stay on screen (to read or copy) |
+| `cat` | Prints the whole file to the screen in one go | The file is a screenful or less, and you want the text to stay on screen to read or copy |
 | `less` | Opens the file in a full-screen pager | The file is longer than a screenful; you need to scroll or search inside it |
-| `head` | Prints the first 10 lines (change with `-n`) | You want the start of a file — e.g. a log's oldest entries |
-| `tail` | Prints the last 10 lines (change with `-n`) | You want the end of a file — e.g. a log's newest entries |
+| `head` | Prints the first 10 lines (change the number with `-n`) | You want the start of a file — a log's oldest entries |
+| `tail` | Prints the last 10 lines (change the number with `-n`) | You want the end of a file — a log's newest entries |
 | `tail -f` | Prints the last lines, then keeps printing new lines as they are written | The file is still growing — see [§3](#3-following-a-live-file) |
 
-Inside `less`: Space moves forward a page, `b` moves back, `/word` searches, `n` jumps to the
-next match, and `q` quits — it is the same viewer `man` uses, which you already met in M2. The
-author's notes report that `less /etc/os-release` opened the file in a full-screen viewer and
-that pressing `q` restored the screen with none of the file left on it; there is no captured
-`less` screen output, so the guide does not show one. See `man less`, `man head`, and
-`man tail`.
+`cat` and `less` read the same file and show the same text. The difference is what happens to your
+screen afterwards. `cat` writes the file to the terminal and the text stays there, scrolling past if
+it does not fit. `less` takes over the screen, shows the file a page at a time, and gives the
+screen back exactly as it was when you quit.
 
-**Try.**
+Inside `less`: Space moves forward a page, `b` moves back, `/word` searches forward, `n` jumps to
+the next match, and `q` quits. `less` is the same pager `man` uses, which you met in M2.
 
-```bash
-cat /etc/os-release          # whole file, stays on screen
-less /etc/os-release        # page at a time; press q to exit
-wc -l /var/log/syslog       # how many lines is "long"?
-head -5 /var/log/syslog     # the oldest lines still in the file
-tail -5 /var/log/syslog     # the newest lines
-```
-
-Output from the author's observation notes:
-
-```text
-$ cat /etc/os-release
-PRETTY_NAME="Ubuntu 26.04.1 LTS"
-NAME="Ubuntu"
-VERSION_ID="26.04"
-VERSION="26.04.1 LTS (Resolute Raccoon)"
-VERSION_CODENAME=resolute
-ID=ubuntu
-ID_LIKE=debian
-HOME_URL="https://www.ubuntu.com/"
-SUPPORT_URL="https://help.ubuntu.com/"
-BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
-PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-UBUNTU_CODENAME=resolute
-LOGO=ubuntu-logo
-```
-
-```text
-$ wc -l /var/log/syslog
-1675 /var/log/syslog
-$ head -5 /var/log/syslog
-2026-10-20T00:14:19.879621+08:00 CANATOY-1063 rsyslogd: [origin software="rsyslogd" swVersion="8.2512.0" x-pid="490" x-info="https://www.rsyslog.com"] rsyslogd was HUPed
-2026-10-20T00:14:11.099267+08:00 CANATOY-1063 kernel: message repeated 3 times: [ mini_init (144): drop_caches: 3]
-2026-10-20T00:14:51.827769+08:00 CANATOY-1063 kernel: bash: bash: potentially unexpected fatal signal 8.
-2026-10-20T00:14:51.827818+08:00 CANATOY-1063 kernel: CPU: 6 UID: 1000 PID: 1094 Comm: bash Not tainted 6.18.54.1-microsoft-standard-WSL2 #1 PREEMPT(none)
-2026-10-20T00:14:51.829110+08:00 CANATOY-1063 kernel: RIP: 0033:0x7ddb8e245ebb
-$ tail -5 /var/log/syslog
-2026-10-20T20:17:32.809052+08:00 CANATOY-1063 wsl-pro-service[43235]: #033[33mWARNING#033[0m Daemon: could not connect to Windows Agent: could not get address: could not read agent port file "/mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address": open /mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address: no such file or directory
-2026-10-20T20:21:33.066436+08:00 CANATOY-1063 wsl-pro-service[43235]: message repeated 4 times: [ #033[33mWARNING#033[0m Daemon: could not connect to Windows Agent: could not get address: could not read agent port file "/mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address": open /mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address: no such file or directory]
-2026-10-20T20:21:33.066569+08:00 CANATOY-1063 wsl-pro-service[43235]: #033[33mWARNING#033[0m Exiting after <nil>: check if the Windows agent is installed and running.
-2026-10-20T20:21:33.068558+08:00 CANATOY-1063 systemd[1]: wsl-pro.service: Deactivated successfully.
-2026-10-20T20:21:33.068663+08:00 CANATOY-1063 systemd[1]: wsl-pro.service: Consumed 317ms CPU time over 31min 4.576s wall clock time, 76.1M memory peak.
-```
-
-Reading these together: `cat` printed all 13 lines of `/etc/os-release` at once and the text
-stayed on screen. The syslog is 1,675 lines — far too much for `cat`. `head -5` shows the oldest
-lines still in the file (from 00:14; the first line, `rsyslogd was HUPed`, is what rsyslog logs
-when it reopens its files after log rotation, so the file only goes back to then). `tail -5`
-shows the newest lines (20:17–20:21, shortly before the author ran it). Every syslog line has
-the same layout: a timestamp, the hostname (`CANATOY-1063` on the author's machine — use your
-own hostname when reading your output), the program that wrote it, and the message.
-
-**Verify.** Your `cat /etc/os-release` output stays on screen after the command finishes; your
-`wc -l` prints a line count; `head -5` and `tail -5` print 5 lines each, with the `tail`
-timestamps later than the `head` timestamps. You exited `less` with `q` and got your prompt and
-screen back.
-
-**Continue** to [§2](#2-searching-contents) to pull specific lines out of a file that is too long
-to read.
-
----
-
-## 2. Searching contents
-
-_Estimated: 15 minutes._
-
-**Understand.** `grep` prints every line that contains a match for the pattern. The pattern is a
-regular expression by default (you met this idea in M2), so `.` matches any character unless you
-pass `-F` to treat the pattern as plain text. The options you will use most:
-
-| Option | Effect |
-| --- | --- |
-| `-i` | Ignore upper/lower case — `error`, `Error`, and `ERROR` all match |
-| `-n` | Put the line number in front of each match |
-| `-v` | Invert the match: print the lines that do **not** match |
-| `-c` | Print only the count of matching lines, not the lines |
-| `-F` | Treat the pattern as a fixed string, not a regular expression |
-
-`-i` matters for logs because log messages are inconsistently capitalized — that is why the
-brief recommends `grep -i` for log searching. `grep` matches text, not meaning: a line matches
-whether or not it reports an actual problem. See `man grep`.
-
-**Try.**
-
-```bash
-grep -i -c "error" /var/log/syslog          # how many lines match?
-grep -i -n "error" /var/log/syslog | head -5   # first few matches, with line numbers
-grep -i "error" /var/log/syslog > ~/linux-course/m3/data/processed/syslog-errors.txt
-wc -l ~/linux-course/m3/data/processed/syslog-errors.txt
-```
-
-(Output redirected with `>` is the M2 skill; the destination directory here is the author's M3
-project layout — use the path that fits yours.)
-
-Output from the author's observation notes:
-
-```text
-$ grep -i -c "error" /var/log/syslog
-39
-
-$ grep -i -n "error" /var/log/syslog | head -5
-14:2026-10-20T00:16:56.255896+08:00 CANATOY-1063 kernel: WSL (30361 - Relay(30362)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-15:2026-10-20T00:16:56.255992+08:00 CANATOY-1063 kernel: WSL (30361 - Relay(30362)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-16:2026-10-20T00:16:56.256005+08:00 CANATOY-1063 kernel: WSL (30361 - Relay(30362)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-129:2026-10-20T09:58:17.441698+08:00 CANATOY-1063 systemd[1]: apport-autoreport.path - Process error reports when automatic reporting is enabled (file watch) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
-130:2026-10-20T09:58:17.441700+08:00 CANATOY-1063 systemd[1]: apport-autoreport.timer - Process error reports when automatic reporting is enabled (timer based) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
-
-$ grep -i "error" /var/log/syslog > ~/linux-course/m3/data/processed/syslog-errors.txt
-$ wc -l ~/linux-course/m3/data/processed/syslog-errors.txt
-39 /home/ejandrea/linux-course/m3/data/processed/syslog-errors.txt
-```
-
-Reading these: 39 of the log's 1,675 lines matched, and the saved file has the same 39 lines —
-the count agreeing is how you know nothing was trimmed by hand. Because of `-i`, the matches
-include `ERROR`, `error`, and `Errors`. Note lines 129–130: they only contain the word in
-"Process error reports" — `grep` matched the text, not what the line means. Not every match is a
-real error; judging that is a separate step. Producing the filtered excerpt for the deliverable,
-and seeing the rest of the matches, is [§5](#5-worked-example-the-m4-lab), Step 4.
-
-**Verify.** `-c` prints just a number; `-n` output starts each line with `N:` where `N` is the
-line's position in the file; your saved excerpt's `wc -l` equals the `-c` count.
-
-**Continue** to [§3](#3-following-a-live-file) to watch a file while it is being written.
-
----
-
-## 3. Following a live file
-
-_Estimated: 15 minutes._
-
-**Understand.** Logs are how you observe the behavior of a system, and they grow while you watch.
-`tail -f file` prints the last lines, then keeps the file open and prints each new line as it is
-written. Two details worth knowing:
-
-- **`-f` versus `-F`.** `tail -f` follows that file by name; `tail -F` also keeps following if
-  the file is replaced, which happens when logs are rotated. See `man tail`.
-- **Stopping.** Ctrl+C stops `tail -f`. It sends an interrupt to the running command, and your
-  prompt comes back — the same way it stops any other foreground command.
-
-To produce a new line on purpose while following the system log, `logger "message"` writes a line
-into the system log from your own shell. See `man logger`.
-
-**Try.** In one terminal:
-
-```bash
-tail -f /var/log/syslog
-```
-
-Leave it running. In a separate terminal or tab, generate activity — the lab suggests
-`sudo apt update`, and `logger "your own test message"` adds a line you can recognize
-uniquely. Then return to the first terminal and watch the new lines arrive. Stop with Ctrl+C.
-
-The author's full captured sequence, including both terminals, is shown with the rest of the lab
-evidence in [§5](#5-worked-example-the-m4-lab), Step 3 — including one finding to expect: the
-`sudo` command's own log line does **not** appear in `/var/log/syslog`. The author confirmed
-where it went:
-
-Output from the author's observation notes:
-
-```text
-$ grep apt /var/log/auth.log | tail -3
-2026-10-20T20:32:03.338130+08:00 CANATOY-1063 sudo: ejandrea : TTY=/dev/pts/4 ; PWD=/home/ejandrea/projects/linux-training-rnd ; USER=root ; COMMAND=/usr/bin/apt update
-```
-
-Authentication-related events such as `sudo` go to `/var/log/auth.log`, not `/var/log/syslog`;
-what appeared in `syslog` were the services that `apt update` set off (more in
-[§5](#5-worked-example-the-m4-lab), Step 3).
-
-**Verify.** New lines appear in the `tail -f` terminal without you re-running the command there;
-after Ctrl+C the prompt returns and the terminal accepts commands again.
-
-**Continue** to [§4](#4-editing-in-the-terminal) to change a file with no GUI in sight.
-
----
-
-## 4. Editing in the terminal
-
-_Estimated: 15 minutes._
-
-**Understand.** Configuration on a server is routinely edited with no GUI available, so terminal
-editors are core skills. The lab uses `nano`; the brief's best practice also names `vim`'s
-escape hatch. The workflow to learn is the same shape in both: **open → change → save → exit →
-show what changed**.
-
-**`nano`.** `nano <file>` opens the file, or starts a new one if it does not exist. Type to make
-changes. Ctrl+O saves (press Enter to confirm the file name); Ctrl+X exits. The bottom two lines
-of the screen list the shortcuts, where `^` means Ctrl. `nano`'s behavior is described from the
-author's notes; there is no captured `nano` screen in them, so none is shown here. See
-`man nano`.
-
-**`vim` (the escape hatch).** If you open a file in `vim` by accident: press `i` to start
-typing (insert mode), `Esc` to stop typing, then `:wq` and Enter to write and quit. That
-sequence is the brief's best practice for first-time `vim` users.
-
-**Showing what changed — `diff`.** To prove an edit, keep a copy from before it, then compare:
-
-```bash
-cp file file.bak        # the "before" copy
-# ... edit file ...
-diff -u file.bak file   # unified diff: what changed
-```
-
-In unified diff output, the `---` and `+++` lines name the two files and their timestamps; a
-`@@` line locates the change; lines starting with `-` were removed and lines starting with `+`
-were added; lines starting with a space are unchanged context. See `man diff`. The author's real
-`cp` → `nano` → `diff -u` sequence on their M3 project README is worked through in
-[§5](#5-worked-example-the-m4-lab), Step 6.
-
-**Try.**
-
-```bash
-nano ~/linux-course/m3/data/raw/notes.txt     # or a practice path of your choice
-```
-
-Add two lines of text, save with Ctrl+O (Enter to confirm), exit with Ctrl+X. Then — without
-reopening the editor — confirm from the command line:
-
-```bash
-cat ~/linux-course/m3/data/raw/notes.txt
-```
-
-Output from the author's observation notes:
-
-```text
-$ nano ~/linux-course/m3/data/raw/notes.txt
-$ cat ~/linux-course/m3/data/raw/notes.txt
-   M4 practice note: written in nano.
-   Saved with Ctrl+O and closed with Ctrl+X.
-```
-
-Keys the author used in `nano`: Ctrl+O, then Enter to confirm the file name, and Ctrl+X to exit.
-Both lines start with three spaces, because the example lines were copied with their indentation
-— and `cat` shows exactly what is in the file, spaces included. (The lab places `notes.txt` under
-`data/raw`; the author notes this does not match their own M3 convention of `data/raw` for
-incoming data files, but kept the lab's path because DoD-04 checks it.)
-
-**Verify.** Your `cat` prints your file's contents without opening the editor again, and the text
-matches what you typed — including any leading spaces you did not intend to keep.
-
-**Continue** to [§5](#5-worked-example-the-m4-lab) to produce the lab's evidence end to end.
-
----
-
-## 5. Worked example: the M4 lab
-
-> **Purpose.** The lab steps from [`brief.md`](./brief.md), plus the diff capture required by
-> [`tasks.md`](./tasks.md) and the write-up's checkpoint evidence, with exactly what to capture.
-> The outputs shown are the author's; yours will differ in hostname, timestamps, counts, and
-> content. Record your own.
-
-_Estimated: 25–30 minutes._
-
-### Step 1 — View a file whole, then a page at a time
-
-**Understand.** The point is the contrast: `cat` leaves the file on screen; `less` takes over
-the screen and clears it away on quit.
+`head` and `tail` are the two ends of a file, without opening it. `head -5` gives the first five
+lines and `tail -5` the last five. Neither scrolls, because neither prints more than you asked for.
 
 **Try.**
 
 ```bash
 cat /etc/os-release
-less /etc/os-release      # press q to exit
+less /etc/os-release
+head -5 /etc/os-release
+tail -5 /etc/os-release
 ```
-
-Raw output of the `cat` command from the author's observation notes (WSL2, Ubuntu 26.04.1 LTS):
 
 ```text
 $ cat /etc/os-release
-PRETTY_NAME="Ubuntu 26.04.1 LTS"
+PRETTY_NAME="Ubuntu 26.04.x LTS"
 NAME="Ubuntu"
 VERSION_ID="26.04"
-VERSION="26.04.1 LTS (Resolute Raccoon)"
+VERSION="26.04.x LTS (Resolute Raccoon)"
 VERSION_CODENAME=resolute
 ID=ubuntu
 ID_LIKE=debian
@@ -344,99 +93,144 @@ UBUNTU_CODENAME=resolute
 LOGO=ubuntu-logo
 ```
 
-The author's account of the `less` half, in words: it opened the file in a full-screen viewer,
-and when `q` was pressed, the screen went back to how it looked before, with none of the file
-left on it. There is no captured `less` screen, so paste your own description of what you saw.
+This is Ubuntu 26.04's set of keys, in the order Ubuntu writes them; `x` stands for the point
+release, so the values differ slightly between point releases. The key set is the distribution's
+choice — another distribution's file carries different keys.
 
-**Capture.** In your notes: the full `cat` output, prompt included, and a sentence on how `less`
-differed — and when you would pick each (see the tool table in [§1](#1-viewing-a-file)).
+`less /etc/os-release` opens the same file in a full-screen pager: the first lines appear and the
+rest waits a page down. Press Space to move forward a page and `b` to move back, type `/` and a
+word to search, and press `q` to quit. When you quit, the screen returns to the shell prompt with
+none of the file left on it — that is the difference to notice against `cat`.
 
-### Step 2 — Top and bottom of the log
+**Verify.** `cat` leaves the file's text on your screen; `less` takes the screen over and gives it
+back. `head -5 /etc/os-release` prints the same first five lines that `cat` printed first, and
+`tail -5 /etc/os-release` prints the same last five. It is the same file, read from a different
+end.
 
-**Understand.** `tasks.md` asks you to view your log from the top and the bottom and note which
-tool fit best. `wc -l` sizes the problem; `head` and `tail` sample each end.
+**Continue** to [§2](#2-searching-contents) to pull the interesting lines out of a file you cannot
+read all the way through.
+
+---
+
+## 2. Searching contents
+
+_Estimated: 13 minutes._
+
+**Understand.** `grep` prints every line that contains a match for a pattern and drops the rest.
+It does not change the file — it is a filter on the way to your screen, and its output can be
+redirected into a file, the way you did in M2.
+
+The pattern is a regular expression by default, which you met in M2. A plain word is a regular
+expression too, so `error` matches those five letters anywhere in a line — including inside
+"errors", and inside longer words such as "errored". The metacharacters are what add the power.
+
+The options that matter for logs:
+
+| Option | What it does | Why you want it |
+| --- | --- | --- |
+| `-i` | Ignores case, so `error` also matches `Error` and `ERROR` | Log messages are not capitalized consistently, so `error` alone misses `ERROR` and `Error` |
+| `-n` | Prints the line number before each match | Tells you *where* a match is, so you can go read around it |
+| `-c` | Prints only the count of matching lines | Answers "how many?" without scrolling the matches |
+| `-v` | Inverts the match and prints the lines that do **not** match | Finds the noise, so you can see what is *not* the problem |
+| `-F` | Treats the pattern as plain text, not a regular expression | For when your pattern contains `.` or `*` and you mean them literally |
+
+`grep` matches text, not meaning. A line that contains the word `error` inside a phrase like
+"Process error reports" is a match, and so is a line that says "no errors detected". Read the
+matches before you trust them.
 
 **Try.**
 
 ```bash
-wc -l /var/log/syslog
-head -5 /var/log/syslog
-tail -5 /var/log/syslog
+grep -i "error" /var/log/syslog
+grep -i -c "error" /var/log/syslog
+grep -i -n "error" /var/log/syslog | head -5
 ```
-
-Raw output from the author's observation notes:
 
 ```text
-$ wc -l /var/log/syslog
-1675 /var/log/syslog
-$ head -5 /var/log/syslog
-2026-10-20T00:14:19.879621+08:00 CANATOY-1063 rsyslogd: [origin software="rsyslogd" swVersion="8.2512.0" x-pid="490" x-info="https://www.rsyslog.com"] rsyslogd was HUPed
-2026-10-20T00:14:11.099267+08:00 CANATOY-1063 kernel: message repeated 3 times: [ mini_init (144): drop_caches: 3]
-2026-10-20T00:14:51.827769+08:00 CANATOY-1063 kernel: bash: bash: potentially unexpected fatal signal 8.
-2026-10-20T00:14:51.827818+08:00 CANATOY-1063 kernel: CPU: 6 UID: 1000 PID: 1094 Comm: bash Not tainted 6.18.54.1-microsoft-standard-WSL2 #1 PREEMPT(none)
-2026-10-20T00:14:51.829110+08:00 CANATOY-1063 kernel: RIP: 0033:0x7ddb8e245ebb
-$ tail -5 /var/log/syslog
-2026-10-20T20:17:32.809052+08:00 CANATOY-1063 wsl-pro-service[43235]: #033[33mWARNING#033[0m Daemon: could not connect to Windows Agent: could not get address: could not read agent port file "/mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address": open /mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address: no such file or directory
-2026-10-20T20:21:33.066436+08:00 CANATOY-1063 wsl-pro-service[43235]: message repeated 4 times: [ #033[33mWARNING#033[0m Daemon: could not connect to Windows Agent: could not get address: could not read agent port file "/mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address": open /mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address: no such file or directory]
-2026-10-20T20:21:33.066569+08:00 CANATOY-1063 wsl-pro-service[43235]: #033[33mWARNING#033[0m Exiting after <nil>: check if the Windows agent is installed and running.
-2026-10-20T20:21:33.068558+08:00 CANATOY-1063 systemd[1]: wsl-pro.service: Deactivated successfully.
-2026-10-20T20:21:33.068663+08:00 CANATOY-1063 systemd[1]: wsl-pro.service: Consumed 317ms CPU time over 31min 4.576s wall clock time, 76.1M memory peak.
+$ grep -i -c "error" /var/log/syslog
+<count>
+
+$ grep -i -n "error" /var/log/syslog | head -5
+<n>:<timestamp> linux-pc kernel: WSL (<pid> - Relay(<pid>)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
+<n>:<timestamp> linux-pc kernel: WSL (<pid> - Relay(<pid>)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
+<n>:<timestamp> linux-pc kernel: WSL (<pid> - Relay(<pid>)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
+<n>:<timestamp> linux-pc systemd[1]: apport-autoreport.path - Process error reports when automatic reporting is enabled (file watch) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
+<n>:<timestamp> linux-pc systemd[1]: apport-autoreport.timer - Process error reports when automatic reporting is enabled (timer based) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
 ```
 
-**Capture.** The line count, plus the `head` and `tail` output with their prompts. Note in your
-own words which tool fit best for which end of the job.
+`-c` gives the number of matching lines and nothing else. `-n` prefixes each match with the line
+number it came from in the original file, so `<n>` above is a position in `/var/log/syslog`, not a
+count.
 
-### Step 3 — Follow the log as it grows (lab step 2)
+The `WSL` lines are why `-i` matters: they carry `ERROR` in capitals, and without `-i` the pattern
+`error` would miss every one of them. The `systemd[1]` lines would match with or without `-i`,
+because the word "error" is already lowercase in "Process error reports" — and they show that
+`grep` matches text, not meaning, since those lines are not failures at all.
 
-**Understand.** Two terminals: one follows, one generates. The evidence is new lines arriving in
-the follower that were not there when it started.
+**Verify.** `grep -i -c "error" /var/log/syslog` and the number of lines that `grep -i "error"
+/var/log/syslog` prints are the same number, because `-c` counts what the plain command shows.
+Run the two commands back to back: the log keeps growing, so a new line that arrives between the
+two runs makes the counts differ by one.
 
-**Try.** Terminal A:
+**Continue** to [§3](#3-following-a-live-file) to watch a log grow while you work.
+
+---
+
+## 3. Following a live file
+
+_Estimated: 12 minutes._
+
+**Understand.** Logs are how the behavior of a system is observed, and they grow while you watch.
+`tail -f` prints the last lines of a file and then keeps the file open, printing each new line as
+it is written, until you stop it.
+
+`tail -f` follows the *file descriptor* — the open connection to the file — not the name. When a
+log is rotated, the old file is renamed and a new file takes its name; `tail -f` keeps reading the
+old, renamed file, so new lines stop appearing. `tail -F` follows the *name* and reopens the file,
+so it keeps up across a rotation. GNU's `tail(1)` spells the difference out: "With --follow (-f),
+tail defaults to following the file descriptor, which means that even if a tail'ed file is renamed,
+tail will continue to track its end… Use --follow=name in that case. That causes tail to track the
+named file in a way that accommodates renaming, removal and creation." `-F` is `--follow=name
+--retry` in a single flag.
+
+To stop following, press **Ctrl+C**. That sends an interrupt to the running command and the shell
+prompt comes back. `tail -f` does not need a second terminal to start, but you do need one to make
+something happen while it runs.
+
+**Try.**
+
+Before you follow the log, check that your user can read it. The mode and the owner tell you who
+can:
+
+```bash
+ls -l /var/log/syslog
+groups
+```
+
+```text
+$ ls -l /var/log/syslog
+-rw-r----- 1 syslog adm <size> <date> <time> /var/log/syslog
+$ groups
+trainee adm cdrom sudo dip plugdev users
+```
+
+The mode `-rw-r-----` says the owner (`syslog`) can read and write it, the group (`adm`) can read
+it, and everyone else cannot. Your own user account reaches the file through the `adm` group, which
+is why `groups` listing `adm` matters. If it does not, ask your trainer for access, or follow a log
+your own user can read.
+
+Open a second terminal tab. In the first one:
 
 ```bash
 tail -f /var/log/syslog
 ```
 
-Leave it running. Terminal B:
+`tail -f` prints the last ten lines and then waits. In the second tab, run something that writes to
+the log:
 
 ```bash
 sudo apt update
-logger "M4 test: following syslog with tail -f"
 ```
-
-Watch Terminal A. Then stop with Ctrl+C.
-
-Raw output from the author's observation notes — Terminal A (WSL2, hostname `CANATOY-1063`;
-`tail -f` first prints the last 10 lines already in the file, so those ten — 20:17 to 20:31 —
-were pre-existing, and the rest arrived while following):
-
-```text
-$ tail -f /var/log/syslog
-2026-10-20T20:17:01.729041+08:00 CANATOY-1063 CRON[43561]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
-2026-10-20T20:17:32.809052+08:00 CANATOY-1063 wsl-pro-service[43235]: #033[33mWARNING#033[0m Daemon: could not connect to Windows Agent: could not get address: could not read agent port file "/mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address": open /mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address: no such file or directory
-2026-10-20T20:21:33.066436+08:00 CANATOY-1063 wsl-pro-service[43235]: message repeated 4 times: [ #033[33mWARNING#033[0m Daemon: could not connect to Windows Agent: could not get address: could not read agent port file "/mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address": open /mnt/c/Users/ejandrea.canatoy_str.CANATOY-1063/.ubuntupro/.address: no such file or directory]
-2026-10-20T20:21:33.066569+08:00 CANATOY-1063 wsl-pro-service[43235]: #033[33mWARNING#033[0m Exiting after <nil>: check if the Windows agent is installed and running.
-2026-10-20T20:21:33.068558+08:00 CANATOY-1063 systemd[1]: wsl-pro.service: Deactivated successfully.
-2026-10-20T20:21:33.068663+08:00 CANATOY-1063 systemd[1]: wsl-pro.service: Consumed 317ms CPU time over 31min 4.576s wall clock time, 76.1M memory peak.
-2026-10-20T20:31:07.687343+08:00 CANATOY-1063 kernel: message repeated 7 times: [ mini_init (139): drop_caches: 3]
-2026-10-20T20:31:48.484230+08:00 CANATOY-1063 kernel: WSL (45288 - Relay(45291)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T20:31:48.484449+08:00 CANATOY-1063 kernel: WSL (45288 - Relay(45291)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T20:31:48.484457+08:00 CANATOY-1063 kernel: WSL (45288 - Relay(45291)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T20:32:03.413203+08:00 CANATOY-1063 systemd[1]: Starting apt-news.service - Update APT News...
-2026-10-20T20:32:03.449315+08:00 CANATOY-1063 systemd[1]: Starting esm-cache.service - Update the local ESM caches...
-2026-10-20T20:32:05.469667+08:00 CANATOY-1063 systemd[1]: apt-news.service: Deactivated successfully.
-2026-10-20T20:32:05.471408+08:00 CANATOY-1063 systemd[1]: Finished apt-news.service - Update APT News.
-2026-10-20T20:32:05.696120+08:00 CANATOY-1063 dbus-daemon[151]: [system] Activating via systemd: service name='org.freedesktop.PackageKit' unit='packagekit.service' requested by ':1.16' (uid=0 pid=45829 comm="/usr/bin/gdbus call --system --dest org.freedeskto" label="kernel")
-2026-10-20T20:32:05.701566+08:00 CANATOY-1063 systemd[1]: Starting packagekit.service - PackageKit Daemon...
-2026-10-20T20:32:05.746686+08:00 CANATOY-1063 PackageKit: daemon start
-2026-10-20T20:32:05.820581+08:00 CANATOY-1063 dbus-daemon[151]: [system] Successfully activated service 'org.freedesktop.PackageKit'
-2026-10-20T20:32:05.821163+08:00 CANATOY-1063 systemd[1]: Started packagekit.service - PackageKit Daemon.
-2026-10-20T20:32:06.600370+08:00 CANATOY-1063 systemd[1]: esm-cache.service: Deactivated successfully.
-2026-10-20T20:32:06.601459+08:00 CANATOY-1063 systemd[1]: Finished esm-cache.service - Update the local ESM caches.
-2026-10-20T20:32:12.157867+08:00 CANATOY-1063 ejandrea: M4 test: following syslog with tail -f
-```
-
-Raw output from the author's observation notes — Terminal B:
 
 ```text
 $ sudo apt update
@@ -445,176 +239,366 @@ Hit:1 http://security.ubuntu.com/ubuntu resolute-security InRelease
 Hit:2 http://archive.ubuntu.com/ubuntu resolute InRelease
 Hit:3 http://archive.ubuntu.com/ubuntu resolute-updates InRelease
 Hit:4 http://archive.ubuntu.com/ubuntu resolute-backports InRelease
-18 packages can be upgraded. Run 'apt list --upgradable' to see them.
-$ logger "M4 test: following syslog with tail -f"
+<count> packages can be upgraded. Run 'apt list --upgradable' to see them.
 ```
 
-Reading the capture: `tail -f` printed the last 10 lines already in the file — 20:17 to 20:31 —
-then kept waiting. After those ten pre-existing lines, new lines arrive from 20:32:03 onward. The
-ones from 20:32:03 — systemd starting `apt-news.service` and `esm-cache.service`, then the
-PackageKit daemon — are services that `sudo apt update` set off. The last line, at 20:32:12, is
-the `logger` message, tagged with the author's username. The `sudo` command's own line is not in
-`syslog`; the author confirmed it was logged in `/var/log/auth.log` instead (shown in
-[§3](#3-following-a-live-file)). Then Ctrl+C stopped the follow and the prompt came back.
+`sudo` runs one command as root and asks for your own password; M5 covers it in full. The lines
+that appear in the `tail -f` window are not `apt`'s own — they come from the services `apt update`
+starts:
 
-**Capture.** The pasted `tail -f` output showing at least one line that appeared *after* you
-started following, attributable to your own action in the other terminal — plus proof you
-stopped it (the prompt returning after Ctrl+C). DoD-02 checks this.
+```text
+<timestamp> linux-pc systemd[1]: Starting apt-news.service - Update APT News...
+<timestamp> linux-pc systemd[1]: Starting esm-cache.service - Update the local ESM caches...
+<timestamp> linux-pc systemd[1]: apt-news.service: Deactivated successfully.
+<timestamp> linux-pc systemd[1]: Finished apt-news.service - Update APT News.
+<timestamp> linux-pc dbus-daemon[<pid>]: [system] Activating via systemd: service name='org.freedesktop.PackageKit' unit='packagekit.service' requested by ':1.<n>' (uid=0 pid=<pid> comm="/usr/bin/gdbus call --system --dest org.freedeskto" label="kernel")
+<timestamp> linux-pc systemd[1]: Starting packagekit.service - PackageKit Daemon...
+<timestamp> linux-pc PackageKit: daemon start
+<timestamp> linux-pc dbus-daemon[<pid>]: [system] Successfully activated service 'org.freedesktop.PackageKit'
+<timestamp> linux-pc systemd[1]: Started packagekit.service - PackageKit Daemon.
+<timestamp> linux-pc systemd[1]: esm-cache.service: Deactivated successfully.
+<timestamp> linux-pc systemd[1]: Finished esm-cache.service - Update the local ESM caches.
+```
 
-### Step 4 — Search the log (lab step 3)
-
-**Understand.** Produce the module's deliverable: a filtered excerpt containing only matching
-lines, made with `grep`, not by hand-trimming in an editor.
-
-**Try.**
+You can also add a line of your own with `logger`, which writes one message into the system log,
+tagged with your username:
 
 ```bash
-grep -i -c "error" /var/log/syslog
-grep -i "error" /var/log/syslog > ~/linux-course/m3/data/processed/syslog-errors.txt
-wc -l ~/linux-course/m3/data/processed/syslog-errors.txt
-cat ~/linux-course/m3/data/processed/syslog-errors.txt
+logger "M4 practice: watching syslog with tail -f"
 ```
-
-Output from the author's observation notes — the count:
 
 ```text
-$ grep -i -c "error" /var/log/syslog
-39
+<timestamp> linux-pc trainee: M4 practice: watching syslog with tail -f
 ```
 
-Output from the author's observation notes — saving the excerpt and verifying it:
+Press **Ctrl+C** in the `tail -f` window to stop following.
 
-```text
-$ grep -i "error" /var/log/syslog > ~/linux-course/m3/data/processed/syslog-errors.txt
-$ wc -l ~/linux-course/m3/data/processed/syslog-errors.txt
-39 /home/ejandrea/linux-course/m3/data/processed/syslog-errors.txt
-```
+**Verify.** Lines appeared in the `tail -f` window that were not there before you ran `sudo apt
+update` — that is the evidence that a file was followed as it grew. The `logger` line carries your
+username, so you can pick it out of the noise. After Ctrl+C, your prompt is back and the window
+stops filling.
 
-The full excerpt, from the author's observation notes:
+**Continue** to [§4](#4-editing-in-the-terminal) to change a file from the terminal.
 
-```text
-$ cat ~/linux-course/m3/data/processed/syslog-errors.txt
-2026-10-20T00:16:56.255896+08:00 CANATOY-1063 kernel: WSL (30361 - Relay(30362)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T00:16:56.255992+08:00 CANATOY-1063 kernel: WSL (30361 - Relay(30362)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T00:16:56.256005+08:00 CANATOY-1063 kernel: WSL (30361 - Relay(30362)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T09:58:17.441698+08:00 CANATOY-1063 systemd[1]: apport-autoreport.path - Process error reports when automatic reporting is enabled (file watch) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
-2026-10-20T09:58:17.441700+08:00 CANATOY-1063 systemd[1]: apport-autoreport.timer - Process error reports when automatic reporting is enabled (timer based) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
-2026-10-20T09:58:17.442641+08:00 CANATOY-1063 kernel: RAS: Correctable Errors collector initialized.
-2026-10-20T09:58:20.354156+08:00 CANATOY-1063 kernel: WSL (156) ERROR: CheckConnection: getaddrinfo() failed: -5
-2026-10-20T10:08:06.265110+08:00 CANATOY-1063 systemd[1]: apport-autoreport.path - Process error reports when automatic reporting is enabled (file watch) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
-2026-10-20T10:08:06.265112+08:00 CANATOY-1063 systemd[1]: apport-autoreport.timer - Process error reports when automatic reporting is enabled (timer based) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
-2026-10-20T10:08:06.266013+08:00 CANATOY-1063 kernel: RAS: Correctable Errors collector initialized.
-2026-10-20T10:08:52.230843+08:00 CANATOY-1063 kernel: WSL (155) ERROR: CheckConnection: getaddrinfo() failed: -5
-2026-10-20T10:10:19.373024+08:00 CANATOY-1063 kernel: WSL (1649 - Relay(1650)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T10:10:19.373196+08:00 CANATOY-1063 kernel: WSL (1649 - Relay(1650)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T10:10:19.373202+08:00 CANATOY-1063 kernel: WSL (1652 - Relay(1653)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T10:10:19.373203+08:00 CANATOY-1063 kernel: WSL (1649 - Relay(1650)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T10:10:19.373214+08:00 CANATOY-1063 kernel: WSL (1652 - Relay(1653)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T10:10:19.376244+08:00 CANATOY-1063 kernel: WSL (1652 - Relay(1653)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T10:13:29.328696+08:00 CANATOY-1063 ubuntu-insights[4614]: 2026/10/20 10:13:29 WARN failed to run wsl.exe -v error="exit status 1"
-2026-10-20T10:13:29.856393+08:00 CANATOY-1063 ubuntu-insights[4614]: 2026/10/20 10:13:29 ERROR failed to collect insights: insights write failed: report already exists for this period
-2026-10-20T11:48:35.792384+08:00 CANATOY-1063 kernel: WSL (161) ERROR: No buffer space available @telemetry.cpp:190 (StartTelemetryAgent)
-2026-10-20T16:36:16.408542+08:00 CANATOY-1063 kernel: WSL (32754 - Relay(32757)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T16:36:16.412198+08:00 CANATOY-1063 kernel: WSL (32754 - Relay(32757)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T16:36:16.412272+08:00 CANATOY-1063 kernel: WSL (32754 - Relay(32757)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T16:36:45.268493+08:00 CANATOY-1063 kernel: WSL (33388 - Relay(33389)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T16:36:45.268603+08:00 CANATOY-1063 kernel: WSL (33388 - Relay(33389)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T16:36:45.268609+08:00 CANATOY-1063 kernel: WSL (33388 - Relay(33389)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T16:36:45.280129+08:00 CANATOY-1063 kernel: WSL (33391 - Relay(33393)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T16:36:45.280156+08:00 CANATOY-1063 kernel: WSL (33391 - Relay(33393)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T16:36:45.280157+08:00 CANATOY-1063 kernel: WSL (33391 - Relay(33393)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T16:36:54.868801+08:00 CANATOY-1063 kernel: WSL (33687 - Relay(33688)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T16:36:54.868895+08:00 CANATOY-1063 kernel: WSL (33687 - Relay(33688)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T16:36:54.868905+08:00 CANATOY-1063 kernel: WSL (33687 - Relay(33688)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T17:25:02.540164+08:00 CANATOY-1063 kernel: WSL (41103 - Relay(41104)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T17:25:02.540396+08:00 CANATOY-1063 kernel: WSL (41107 - Relay(41109)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
-2026-10-20T17:25:02.540402+08:00 CANATOY-1063 kernel: WSL (41103 - Relay(41104)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T17:25:02.540520+08:00 CANATOY-1063 kernel: WSL (41107 - Relay(41109)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
-2026-10-20T17:25:02.544226+08:00 CANATOY-1063 kernel: WSL (41103 - Relay(41104)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T17:25:02.544270+08:00 CANATOY-1063 kernel: WSL (41107 - Relay(41109)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
-2026-10-20T19:55:57.199284+08:00 CANATOY-1063 kernel: WSL (155) ERROR: CheckConnection: getaddrinfo() failed: -5
-```
+---
 
-Reading the excerpt: every line matches, and nothing was trimmed by hand — the `-c` count (39)
-equals the file's line count. Because of `-i`, it caught `ERROR`, `error`, and `Errors` alike.
-Not every match is a real error: the `apport-autoreport` lines only contain the word in "Process
-error reports", the `RAS: Correctable Errors collector initialized.` lines are startup messages,
-and one `ubuntu-insights` line is a `WARN` that only mentions `error="exit status 1"`. Most
-matches (31 of the 39 on the author's machine) are WSL's own kernel messages. The excerpt is
-also a snapshot: it stops at 19:55, so the three WSL `ERROR` lines from 20:31 — which appeared
-in the `tail -f` capture in Step 3 — came after it was saved.
+## 4. Editing in the terminal
 
-**Capture.** The command you used, the `-c` count, and the full `cat` of your excerpt file. The
-excerpt must contain only matching lines, produced by the tool. DoD-03 checks this.
+_Estimated: 13 minutes._
 
-### Step 5 — Create and edit a file in nano (lab steps 4–5)
+**Understand.** A server has no GUI, so configuration gets edited in a terminal editor. Two are on
+this image. The lab's own editing step uses **nano**, and so does the fourth item in the
+definition of done; `vim` is here because it is the editor you will meet on production servers,
+and because the brief's best practice is about it.
 
-**Understand.** Two lines written in the editor, confirmed from the command line — proving the
-round trip without any GUI.
+**nano** is the forgiving one. `nano file` opens the file, or starts a new one if it does not
+exist. You type, and the shortcuts are listed at the bottom of the screen as you go, so there is
+nothing to memorize. `^` means the Control key:
+
+| Keys | What it does |
+| --- | --- |
+| `Ctrl+O` | Write the file out — save it |
+| `Enter` | Confirm the file name, after `Ctrl+O` |
+| `Ctrl+X` | Exit the editor |
+
+**vim** is the one that is everywhere, and the one the brief's best practice is about. It has two
+modes, and that is what makes it hard at first:
+
+| Keys | What it does |
+| --- | --- |
+| `i` | Enter insert mode — now your keystrokes become text |
+| `Esc` | Leave insert mode and go back to normal mode |
+| `:wq` | Write the file and quit (Enter confirms) |
+| `:q` | Quit. If you have unsaved changes, it refuses and shows `E37: No write since last change (add ! to override)` |
+| `:q!` | Quit without saving, discarding the changes — the `!` overrides that refusal |
+
+Both editors work the same way from the outside: open, change, save, exit, then confirm the result
+from the shell with `cat`. `man nano` and `man vim` are the reference pages; vim's own help lives
+inside the program (`:help`), and `vimtutor` is an interactive introduction installed on this
+image.
+
+To show what changed, copy the file before you edit it, then compare the two with `diff -u`. The
+`---` line names the old file, the `+++` line the new one, and a `@@` line says where the change
+is. A line starting with `-` was removed, a line starting with `+` was added, and a line starting
+with a space is unchanged context.
 
 **Try.**
+
+Practice on a file the lab does not use, so the lab's own files stay untouched for
+[§5](#5-worked-example-the-m4-lab), Steps 4–5:
+
+```bash
+vim ~/linux-course/m4-editor-practice.txt
+```
+
+`vim` opens the file in normal mode. Press `i` to enter insert mode, type one line of your own,
+press `Esc` to go back to normal mode, then type `:wq` and press Enter to write the file and
+quit. That is the whole sequence the brief's best practice is about — `Esc` and `:wq`.
+
+Check the result from the shell:
+
+```bash
+cat ~/linux-course/m4-editor-practice.txt
+```
+
+```text
+$ cat ~/linux-course/m4-editor-practice.txt
+M4 vim practice: typed in insert mode, saved with :wq.
+```
+
+`cat` shows what is actually in the file, spaces and all. If a line starts with spaces you did not
+type, the editor kept them — that happens when text is pasted in, because the paste brings its
+indentation with it. Type the line instead of pasting it, or delete the leading spaces in the
+editor.
+
+`nano` works the same way from the outside — open, type, save with `Ctrl+O`, confirm with
+`Enter`, exit with `Ctrl+X` — and it lists those shortcuts at the bottom of the screen as you go.
+The lab's own editing step uses `nano` on `notes.txt`; see [§5](#5-worked-example-the-m4-lab),
+Steps 4–5. The `diff -u` exercise that shows a changed file is in the deliverable steps of the
+same section, under "Showing what changed."
+
+**Verify.** `cat` of the practice file shows the line you typed, which means `:wq` wrote it out.
+The lab's `notes.txt` and the `diff -u` output are separate evidence, gathered in
+[§5](#5-worked-example-the-m4-lab), Steps 4–5 and "Showing what changed."
+
+**Continue** to [§5](#5-worked-example-the-m4-lab) to run the whole lab end to end.
+
+---
+
+## 5. Worked example: the M4 lab
+
+_Estimated: 25 minutes._
+
+**Understand.** The lab views, follows, searches, and edits a real log file on your own system,
+and ends with the brief's deliverable: a filtered log excerpt, produced by a search tool rather
+than by an editor's find function.
+
+### Step 1 — View a system file in full, then a page at a time
+
+```bash
+cat /etc/os-release
+less /etc/os-release
+```
+
+`cat` prints all thirteen lines of `/etc/os-release` at once and leaves them on the screen. `less`
+opens the same file in its own full-screen view; press `q` and the screen goes back to how it
+looked before, with none of the file left on it.
+
+*Capture:* the `cat` output, and a sentence on how the two behaved differently and when you would
+choose each.
+
+### Step 2 — Follow the system log as it grows
+
+In the first terminal:
+
+```bash
+tail -f /var/log/syslog
+```
+
+In a second tab, run the trigger:
+
+```bash
+sudo apt update
+```
+
+```text
+$ sudo apt update
+[sudo: authenticate] Password:
+Hit:1 http://security.ubuntu.com/ubuntu resolute-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu resolute InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu resolute-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu resolute-backports InRelease
+<count> packages can be upgraded. Run 'apt list --upgradable' to see them.
+```
+
+New lines appear in the `tail -f` window as `apt update` starts the services it depends on:
+
+```text
+<timestamp> linux-pc systemd[1]: Starting apt-news.service - Update APT News...
+<timestamp> linux-pc systemd[1]: Starting esm-cache.service - Update the local ESM caches...
+<timestamp> linux-pc systemd[1]: apt-news.service: Deactivated successfully.
+<timestamp> linux-pc systemd[1]: Finished apt-news.service - Update APT News.
+<timestamp> linux-pc systemd[1]: Starting packagekit.service - PackageKit Daemon...
+<timestamp> linux-pc PackageKit: daemon start
+<timestamp> linux-pc systemd[1]: Started packagekit.service - PackageKit Daemon.
+<timestamp> linux-pc systemd[1]: esm-cache.service: Deactivated successfully.
+<timestamp> linux-pc systemd[1]: Finished esm-cache.service - Update the local ESM caches.
+```
+
+`apt` does not write a line of its own to `/var/log/syslog`. `sudo` records the command it ran in
+a different log:
+
+```bash
+grep apt /var/log/auth.log | tail -3
+```
+
+```text
+$ grep apt /var/log/auth.log | tail -3
+<timestamp> linux-pc sudo: trainee : TTY=/dev/pts/<n> ; PWD=/home/trainee ; USER=root ; COMMAND=/usr/bin/apt update
+```
+
+Searching for `apt` finds the `sudo` line for the `apt update` command. Searching for `sudo`
+instead would also match the PAM session lines that surround it, so the command's own line may
+not be the last one you see.
+
+Stop following with **Ctrl+C**.
+
+*Capture:* the pasted `tail -f` output showing the new lines, and the Ctrl+C that stopped it.
+
+### Step 3 — Search the log for a case-insensitive pattern
+
+```bash
+grep -i "error" /var/log/syslog
+```
+
+```text
+$ grep -i "error" /var/log/syslog
+<timestamp> linux-pc kernel: WSL (<pid> - Relay(<pid>)) ERROR: ReceiveMessage:523: ExpectedMessage LxInitMessageExitStatus, but socket Control was closed
+<timestamp> linux-pc kernel: WSL (<pid> - Relay(<pid>)) ERROR: InitCreateProcessUtilityVm:2129: Failed to write exit status 5
+<timestamp> linux-pc kernel: WSL (<pid> - Relay(<pid>)) ERROR: InitCreateProcessUtilityVm:2149: waitpid failed 5
+<timestamp> linux-pc systemd[1]: apport-autoreport.path - Process error reports when automatic reporting is enabled (file watch) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
+<timestamp> linux-pc systemd[1]: apport-autoreport.timer - Process error reports when automatic reporting is enabled (timer based) skipped, unmet condition check ConditionPathExists=/var/lib/apport/autoreport
+```
+
+The five lines above are only the first five of a longer output — your log has more matches than
+that. Every line printed contains the pattern in some case — that is what `-i` does. Read them
+anyway: the `apport-autoreport` lines match the word "error" inside "Process error reports" and
+are not failures.
+
+*Capture:* the `grep` output with the command that produced it. Paste every line, not just these
+five: the definition of done in [`brief.md`](./brief.md) rules out trimming.
+
+### Step 4 — Create and edit a file in nano
 
 ```bash
 nano ~/linux-course/m3/data/raw/notes.txt
-# type two lines; Ctrl+O, Enter to save; Ctrl+X to exit
+```
+
+Add two lines of text. Save with `Ctrl+O`, confirm with `Enter`, and exit with `Ctrl+X`.
+
+*Capture:* a note of the keys you used.
+
+### Step 5 — Confirm the file from the command line
+
+```bash
 cat ~/linux-course/m3/data/raw/notes.txt
 ```
 
-Raw output from the author's observation notes:
-
 ```text
-$ nano ~/linux-course/m3/data/raw/notes.txt
 $ cat ~/linux-course/m3/data/raw/notes.txt
-   M4 practice note: written in nano.
-   Saved with Ctrl+O and closed with Ctrl+X.
+M4 practice note: written in nano.
+Saved with Ctrl+O and closed with Ctrl+X.
 ```
 
-Both lines start with three spaces because the example lines were copied with their indentation —
-`cat` shows exactly what is in the file. Use your own practice text; the path is the lab's, kept
-because DoD-04 checks it.
+*Capture:* the `cat` output, which is the evidence that the file exists with the two lines in it.
 
-**Capture.** The pasted `cat` output showing your two lines, prompt included. DoD-04 checks this.
+### Deliverable steps from tasks.md
 
-### Step 6 — Show what changed with diff (from tasks.md)
+**The top and bottom of the log, with `head` and `tail`.** Size the log before you open it, then
+look at each end:
 
-**Understand.** `tasks.md` requires at least one terminal edit with a visible diff, and the
-write-up's checkpoint evidence asks for it. The pattern is: copy first, edit, then `diff -u`.
+```bash
+wc -l /var/log/syslog
+head -5 /var/log/syslog
+tail -5 /var/log/syslog
+```
 
-**Try.** The author used their M3 project README as the file to edit:
+```text
+$ wc -l /var/log/syslog
+<count> /var/log/syslog
+
+$ head -5 /var/log/syslog
+<timestamp> linux-pc rsyslogd: [origin software="rsyslogd" swVersion="8.2512.0" x-pid="<pid>" x-info="https://www.rsyslog.com"] rsyslogd was HUPed
+<timestamp> linux-pc kernel: message repeated 3 times: [ mini_init (<pid>): drop_caches: 3]
+<timestamp> linux-pc kernel: bash: bash: potentially unexpected fatal signal 8.
+<timestamp> linux-pc kernel: CPU: 6 UID: 1000 PID: <pid> Comm: bash Not tainted <version>-microsoft-standard-WSL2 #1 PREEMPT(none)
+<timestamp> linux-pc kernel: RIP: 0033:0x7ddb8e245ebb
+
+$ tail -5 /var/log/syslog
+<timestamp> linux-pc CRON[<pid>]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+<timestamp> linux-pc chronyd[<pid>]: Selected source <address> (2.ntp.ubuntu.com)
+<timestamp> linux-pc systemd[1]: Starting motd-news.service - Message of the Day...
+<timestamp> linux-pc systemd[1]: motd-news.service: Deactivated successfully.
+<timestamp> linux-pc systemd[1]: Finished motd-news.service - Message of the Day.
+```
+
+Every line has the same layout: a timestamp, the hostname, the program that wrote it, and the
+message. `head` shows the oldest lines still in the file, `tail` the newest. The kernel release on
+WSL2 carries a `-microsoft-standard-WSL2` suffix, because Microsoft builds the kernel rather than
+the distribution.
+
+*Capture:* the line count and both ends of the log.
+
+**Saving the filtered excerpt to a file.** The brief's deliverable is the excerpt, produced by a
+search tool rather than by hand:
+
+```bash
+grep -i "error" /var/log/syslog > ~/linux-course/m3/data/processed/syslog-errors.txt
+wc -l ~/linux-course/m3/data/processed/syslog-errors.txt
+```
+
+```text
+$ wc -l ~/linux-course/m3/data/processed/syslog-errors.txt
+<count> /home/trainee/linux-course/m3/data/processed/syslog-errors.txt
+```
+
+The count from `wc -l` is the same as the count from `grep -i -c "error" /var/log/syslog`. Run the
+two commands back to back, because the log keeps growing: a new line that arrives between the two
+runs makes the counts differ by one.
+
+*Capture:* the redirect command and the count.
+
+**Showing what changed.** Copy the file, edit it, and diff the two. This uses the `README.md` from
+M3's example scheme, which is a one-line file, so the diff is one added line against one
+unchanged line:
 
 ```bash
 cp ~/linux-course/m3/docs/README.md ~/linux-course/m3/docs/README.md.bak
 nano ~/linux-course/m3/docs/README.md
-# make one small edit; Ctrl+O, Enter; Ctrl+X
 diff -u ~/linux-course/m3/docs/README.md.bak ~/linux-course/m3/docs/README.md
 ```
 
-Raw output from the author's observation notes:
+If your M3 tree has no `README.md`, use `notes.txt` instead — copy it to `notes.txt.bak`, edit
+`notes.txt`, and diff the two the same way. Its hunk header reads `@@ -1,2 +1,3 @@`, because
+`notes.txt` starts with two lines:
+
+```bash
+cp ~/linux-course/m3/data/raw/notes.txt ~/linux-course/m3/data/raw/notes.txt.bak
+nano ~/linux-course/m3/data/raw/notes.txt
+diff -u ~/linux-course/m3/data/raw/notes.txt.bak ~/linux-course/m3/data/raw/notes.txt
+```
 
 ```text
 $ diff -u ~/linux-course/m3/docs/README.md.bak ~/linux-course/m3/docs/README.md
---- /home/ejandrea/linux-course/m3/docs/README.md.bak	2026-10-20 20:30:43.046544138 +0800
-+++ /home/ejandrea/linux-course/m3/docs/README.md	2026-10-20 20:38:13.848760908 +0800
-@@ -1,4 +1,5 @@
- # Orders data
-+   data/raw/notes.txt holds my M4 nano practice notes.
- 
- - `data/raw/orders/`: order files exactly as they arrive, one per day (`orders_YYYY-MM-DD.csv`). Never edited.
- - `data/processed/orders/`: cleaned copies made by `scripts/clean_orders.sh` (`orders_clean_YYYY-MM-DD.csv`).
+--- /home/trainee/linux-course/m3/docs/README.md.bak	<timestamp>
++++ /home/trainee/linux-course/m3/docs/README.md	<timestamp>
+@@ -1 +1,2 @@
+ Raw order files land in data/raw/orders.
++data/raw/notes.txt holds the M4 practice notes.
 ```
 
-Reading the diff: the `---` and `+++` lines name the two files and when each was last changed.
-`@@ -1,4 +1,5 @@` says the change is near the top: 4 lines before, 5 after. The one line starting
-with `+` is the added line; lines starting with a space are unchanged context. The added line
-kept the three spaces copied by accident during this edit, and `diff` shows them too.
+The hunk header `@@ -1 +1,2 @@` says the change is at the top of the file: one line before, two
+after. The single line starting with `+` is the line you added.
 
-**Capture.** The `diff -u` output showing your added (or removed) line against the backup. Edit
-a file of your own — the author's README is an example, not a requirement.
+*Capture:* the `diff` output.
 
-**Clean-up.** Stop `tail -f` with Ctrl+C if it is still running (Step 3). The practice file
-(`notes.txt`) and your backup/diff artifacts stay under `~/linux-course/`.
+**Write-up.** Fill every heading of [`write-up-template.md`](./write-up-template.md) in your own
+`write-up.md`: "What I built," "Why it's built this way," "How to build it," "Concepts worth
+explaining," "What tripped me up," "Checkpoint evidence," and "What I'd do differently." Under
+"Checkpoint evidence," paste the filtered excerpt, the command that produced it, and the diff.
+Finish with the final self-review: re-read your write-up against the definition of done in
+[`brief.md`](./brief.md).
 
-**Continue** to [§6](#6-completion-checklist) to confirm the deliverable is complete.
+### Clean-up
+
+The `tail -f` is already stopped — Ctrl+C in Step 2 did that. The practice files stay under
+`~/linux-course/`, as the brief says: the editor practice file `~/linux-course/m4-editor-practice.txt`
+from [§4](#4-editing-in-the-terminal), and the lab's own `notes.txt` under
+`~/linux-course/m3/data/raw/`. What the clean-up does **not** cover: the saved excerpt in
+`~/linux-course/m3/data/processed/` and the backup copy `~/linux-course/m3/docs/README.md.bak`
+(or `~/linux-course/m3/data/raw/notes.txt.bak`, if you used the `notes.txt` fallback) both stay
+on disk, because they are your evidence. Remove them only when you no longer need them for the
+write-up.
 
 ---
 
@@ -622,26 +606,23 @@ a file of your own — the author's README is an example, not a requirement.
 
 _Estimated: 5 minutes._
 
-Map your observation notes to the definition of done in [`brief.md`](./brief.md):
+Map your notes to the definition of done in [`brief.md`](./brief.md):
 
-- [ ] **DoD-01 — `cat` versus `less`, and when to choose each.** Your notes describe how `cat`
-      and `less` behaved differently on `/etc/os-release`, and when each would be chosen
-      (Lab step 1). *Verify via [§5](#5-worked-example-the-m4-lab), Step 1.*
-- [ ] **DoD-02 — Following a growing file.** The pasted `tail -f` output shows the new line
-      produced by your own `sudo apt update`, demonstrating the file was followed as it grew
-      and then stopped with Ctrl+C (Lab step 2).
-      *Verify via [§5](#5-worked-example-the-m4-lab), Step 3.*
-- [ ] **DoD-03 — The filtered excerpt.** The `grep -i "error" /var/log/syslog` output
-      contains only lines that match, with no manual trimming —
-      the `-c` count and the saved file's `wc -l` agree (Lab step 3).
-      *Verify via [§5](#5-worked-example-the-m4-lab), Step 4.*
-- [ ] **DoD-04 — `notes.txt`, confirmed from the command line.** `notes.txt` exists with the
-      two lines written in `nano`, and the pasted `cat` output confirms it (Lab steps 4–5).
-      *Verify via [§5](#5-worked-example-the-m4-lab), Step 5.*
+- [ ] DoD-01: The trainee's notes describe how `cat` and `less` behaved differently on
+      `/etc/os-release` and when each would be chosen (Lab step 1). *Verify via
+      [§5](#5-worked-example-the-m4-lab), Step 1.*
+- [ ] DoD-02: The pasted `tail -f` output shows the new line produced by the trainee's own
+      `sudo apt update`, demonstrating that a file was followed as it grew and then stopped (Lab
+      step 2). *Verify via [§5](#5-worked-example-the-m4-lab), Step 2.*
+- [ ] DoD-03: The `grep -i "error" /var/log/syslog` output contains only lines that match the
+      pattern, with no manual trimming (Lab step 3). *Verify via
+      [§5](#5-worked-example-the-m4-lab), Step 3; the saved excerpt in the deliverable steps is
+      the same command, and its line count matches `grep -c`.*
+- [ ] DoD-04: `notes.txt` exists with the two lines written in `nano`, and the pasted `cat` output
+      confirms it from the command line (Lab steps 4–5). *Verify via
+      [§5](#5-worked-example-the-m4-lab), Steps 4–5.*
 
-When all four are ticked, transfer the evidence — including the diff that
-[`tasks.md`](./tasks.md) asks for ([§5](#5-worked-example-the-m4-lab), Step 6) — into your
-write-up ([`write-up-template.md`](./write-up-template.md)) and continue to M5.
+When all four are ticked, transfer the evidence into your `write-up.md` and continue to M5.
 
 ---
 
@@ -651,62 +632,89 @@ _Estimated: 5 minutes._
 
 ### Best practices
 
-- **Use `less` rather than `cat` for anything longer than a screenful.** `cat` on a 1,675-line
-  log scrolls past before you can read it; `less` lets you page and search
+- Use `less` rather than `cat` for anything longer than a screenful
   ([§1](#1-viewing-a-file)).
-- **Use `tail -f` to watch a log during an active process.** Running a command in a second
-  terminal and watching the lines arrive is how you confirm what it did
+- Use `tail -f` to watch a log during an active process
   ([§3](#3-following-a-live-file)).
-- **Remember `Esc` and `:wq` when first learning `vim`.** Insert with `i`, leave insert mode
-  with `Esc`, then `:wq` and Enter to write and quit ([§4](#4-editing-in-the-terminal)).
-- **Search logs with `grep -i`, since log messages are inconsistently capitalized.** The
-  author's own excerpt caught `ERROR`, `error`, and `Errors` only because of `-i`
+- Remember `Esc` and `:wq` when first learning `vim`
+  ([§4](#4-editing-in-the-terminal)).
+- Search logs with `grep -i`, since log messages are inconsistently capitalized
   ([§2](#2-searching-contents)).
 
 ### Troubleshooting
 
-| Symptom | Likely cause | Recommended fix |
+| Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| The `sudo` line you expected after `sudo apt update` never appears in `/var/log/syslog`, even though other `apt`-related lines do | `sudo` logs its commands to `/var/log/auth.log`, not `/var/log/syslog`. The author verified this with `grep apt /var/log/auth.log \| tail -3` ([§3](#3-following-a-live-file)). | Check `/var/log/auth.log` for the `sudo` line; judge the `tail -f` evidence by the service lines `apt update` set off (systemd units, PackageKit) instead. |
-| Your `notes.txt` (or diff) shows leading spaces you do not remember typing | Text copied from an example — including the example's indentation — lands in the file verbatim; `cat` and `diff` show exactly what is on disk. The author's own notes.txt lines and README edit each kept three stray spaces ([§5](#5-worked-example-the-m4-lab), Steps 5–6). | Retype the line instead of pasting, or delete the leading spaces in the editor before saving. `cat` after saving is the ground truth. |
-| `grep -i "error"` returns lines that are not errors — startup messages, or the word "error" inside unrelated phrases | `grep` matches text, not meaning. In the author's excerpt, `apport-autoreport` lines matched "Process error reports", and a `RAS: Correctable Errors collector initialized.` line is a normal startup message ([§2](#2-searching-contents)). | Expect some false positives; narrow the pattern (add context words or use `-w`) and review matches rather than assuming every hit is a failure. |
+| `cat: /home/trainee/linux-course/m3/data/raw/notes.txt: No such file or directory`, the same message from `grep` with a `grep: ` prefix, the bare path followed by `: No such file or directory` from `less`, or `tail: cannot open '/home/trainee/linux-course/m3/data/raw/notes.txt' for reading: No such file or directory` followed by `tail: no files remaining` | The path is wrong — the file is not at that path, or not there yet. The four commands report the one problem in their own words | Check the path with `ls -l ~/linux-course/m3/data/raw/` |
+| `ls -l /var/log/syslog` shows `-rw-r----- 1 syslog adm`, and `groups` does not list `adm` | The log is owned by `syslog`, and is readable by the `adm` group and by root only. Your user account is not in that group | Confirm with `ls -l /var/log/syslog` and `groups`. Ask your trainer for access, or follow a log your own user can read |
+| `grep` prints nothing and returns to the prompt | No line matches the pattern as you typed it. Log messages are capitalized inconsistently, so `error` misses `ERROR` and `Errors` | Check the pattern, or add `-i`: `grep -i "error" /var/log/syslog` ([§2](#2-searching-contents)) |
+| `tail -f` keeps running, but no new lines appear after the log is rotated | `-f` follows the file descriptor, so it keeps reading the old, renamed file while the new lines go to the new file under the same name | Use `tail -F`, which follows the name and reopens the file ([§3](#3-following-a-live-file)) |
+| `sudo apt update` adds no line of its own to `/var/log/syslog` | `sudo` logs the command it ran to `/var/log/auth.log` instead. The new lines in `syslog` come from the services `apt update` starts | Look for the `apt-news`, `esm-cache`, and `packagekit` lines, and check `grep apt /var/log/auth.log \| tail -3` for `sudo`'s own record ([§5](#5-worked-example-the-m4-lab), Step 2) |
+| The lines in the file you edited start with spaces you did not type | Text pasted into the editor brought its indentation with it | Type the line instead of pasting it, or remove the leading spaces in the editor. `cat` shows the spaces exactly as they are in the file ([§4](#4-editing-in-the-terminal)) |
+| `nano` prints `[ Directory '/home/trainee/linux-course/m3/data/raw' does not exist ]` | The folder the file goes in does not exist — usually because the M3 tree was never built | Create it with `mkdir -p ~/linux-course/m3/data/raw` ([§4](#4-editing-in-the-terminal)) |
 
 ---
 
 ## 8. References
 
+_Estimated: 5 minutes._
+
 Everything here is documented on your own machine; the offline manual pages are the primary
-reference:
+reference. On this image `cat`, `head`, `tail`, and `wc` come from the uutils (`rust-`)
+implementation of coreutils, so their local pages are the uutils ones and differ from the GNU
+coreutils pages linked below. `cp`, `less`, `grep`, `diff`, `logger`, `nano`, and `vim` are the
+GNU or upstream pages.
 
-- `man cat` — concatenate files and print.
-- `man less` — the pager: paging keys, `/` search, `q` quit.
-- `man head` — output the first part of files (`-n` to change the count).
-- `man tail` — output the last part of files; `-f` to follow, `-F` to follow across renames.
-- `man grep` — print lines matching a pattern; `-i`, `-n`, `-v`, `-c`, `-F`.
-- `man nano` — the terminal editor: Ctrl+O save, Ctrl+X exit.
-- `man diff` — compare files line by line; `-u` for unified output.
-- `man logger` — make entries in the system log.
+- `man cat` — the uutils (`rust-cat`) page on this image. Concatenating files onto standard output.
+- `man head` — the uutils (`rust-head`) page on this image. The `-n` option that sets how many
+  lines to print.
+- `man tail` — the uutils (`rust-tail`) page on this image. The `-f` option that follows a growing
+  file, and `-F`, which on this image is `--follow=name --retry`. The page documents `-F` but not
+  the rotation behavior behind it; GNU's `tail(1)`, linked below, is the page that explains that
+  `-f` follows the file descriptor and `--follow=name` follows the name.
+- `man wc` — the uutils (`rust-wc`) page on this image. The `-l` option that counts lines.
+- `man cp` — the GNU coreutils page. Copying a file, which is how the backup is made before an
+  edit.
+- `man less` — the GNU less page. The pager commands: Space, `b`, `/`, `n`, and `q`.
+- `man grep` — the GNU grep page. The `-i`, `-n`, `-c`, `-v`, and `-F` options.
+- `man nano` — the GNU nano page. Its EDITING section explains the `^` prefix for Control keys.
+- `man diff` — the GNU diffutils page. The `-u` unified format and the `@@` hunk header.
+- `man logger` — the util-linux page. Writing a message into the system log.
+- `man vim` — the Vim page. Vim's own help is inside the program (`:help`); `vimtutor` is an
+  interactive introduction, and `man vim` points at both.
 
-Online copies of the same pages (confirmed live):
+Online copies of the same pages:
 
-- [`cat(1)`](https://man7.org/linux/man-pages/man1/cat.1.html)
+- [`cat(1)`](https://man7.org/linux/man-pages/man1/cat.1.html) — GNU coreutils' page; it differs
+  from the local uutils one.
+- [`head(1)`](https://man7.org/linux/man-pages/man1/head.1.html) — GNU coreutils' page; it differs
+  from the local uutils one.
+- [`tail(1)`](https://man7.org/linux/man-pages/man1/tail.1.html) — GNU coreutils' page; it differs
+  from the local uutils one, and it is the page that explains the rotation behavior of `-f` and
+  `--follow=name`.
+- [`wc(1)`](https://man7.org/linux/man-pages/man1/wc.1.html) — GNU coreutils' page; it differs from
+  the local uutils one.
+- [`cp(1)`](https://man7.org/linux/man-pages/man1/cp.1.html)
 - [`less(1)`](https://man7.org/linux/man-pages/man1/less.1.html)
-- [`head(1)`](https://man7.org/linux/man-pages/man1/head.1.html)
-- [`tail(1)`](https://man7.org/linux/man-pages/man1/tail.1.html)
 - [`grep(1)`](https://man7.org/linux/man-pages/man1/grep.1.html)
-- [`nano(1)`](https://manpages.debian.org/bookworm/nano/nano.1.en.html) (Debian mirror; man7.org
-  does not host nano)
 - [`diff(1)`](https://man7.org/linux/man-pages/man1/diff.1.html)
 - [`logger(1)`](https://man7.org/linux/man-pages/man1/logger.1.html)
+- [nano's documentation](https://www.nano-editor.org/docs.php) — the editor's own site; there is no
+  `nano(1)` page on man7.org.
+- [Vim's help](https://vimhelp.org/) — the help files that `man vim` points at; there is no
+  `vim(1)` page on man7.org.
 
 Module artifacts:
 
 - [`brief.md`](./brief.md) — objective, scope, lab, definition of done.
-- [`tasks.md`](./tasks.md) — the ordered checklist for this module, including the diff capture.
-- [`write-up-template.md`](./write-up-template.md) — where the lab evidence goes.
-- [`knowledge/observations/m04-viewing-editing-files.md`](../../knowledge/observations/m04-viewing-editing-files.md)
-  — the author's captured output, used as the labeled examples in this guide.
-- Course architecture: [`docs/arch-docs/linux-training.md`](../../docs/arch-docs/linux-training.md) —
-  where M4 sits in the curriculum (Filesystem/data layer, Week 2, with M3).
-- Curriculum resource for this stage: *Viewing and Editing Files from the Terminal* (listed for
-  the M3–M4 layer in the architecture doc).
+- [`tasks.md`](./tasks.md) — the ordered checklist for this module.
+- [`write-up-template.md`](./write-up-template.md) — the template your `write-up.md` is made from.
+- Course architecture: [`docs/arch-docs/linux-training.md`](../../docs/arch-docs/linux-training.md)
+  — where M4 sits in the curriculum (Layer 2, Week 2, with M3).
+
+Curriculum resources for the Filesystem layer (M3–M4), by name:
+
+- *Linux Filesystem Explained*
+- *File System Structure Explained* (video)
+- *Basic Linux Navigation and File Management*
+- *Viewing and Editing Files from the Terminal*
